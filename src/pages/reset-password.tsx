@@ -13,38 +13,35 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Navigation } from "@/components/Navigation";
-import { Link } from "react-router-dom";
 
-const loginSchema = z.object({
+const resetSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type ResetFormValues = z.infer<typeof resetSchema>;
 
-export default function LoginPage() {
+export default function ResetPasswordPage() {
   const { toast } = useToast();
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<ResetFormValues>({
+    resolver: zodResolver(resetSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit = async (data: ResetFormValues) => {
     try {
-      // TODO: Implement actual authentication logic
-      console.log("Login data:", data);
+      // TODO: Implement actual password reset logic
+      console.log("Reset password for email:", data.email);
       toast({
-        title: "Login Successful",
-        description: "Welcome back!",
+        title: "Reset Link Sent",
+        description: "Check your email for password reset instructions.",
       });
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Invalid email or password",
+        description: "Failed to send reset link. Please try again.",
       });
     }
   };
@@ -55,9 +52,9 @@ export default function LoginPage() {
       <div className="container mx-auto px-4 pt-24">
         <div className="max-w-md mx-auto space-y-6">
           <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold">Welcome Back</h1>
+            <h1 className="text-2xl font-bold">Reset Password</h1>
             <p className="text-muted-foreground">
-              Enter your credentials to access your account
+              Enter your email address and we'll send you a link to reset your password
             </p>
           </div>
 
@@ -81,45 +78,11 @@ export default function LoginPage() {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Enter your password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <Button type="submit" className="w-full">
-                Sign In
+                Send Reset Link
               </Button>
             </form>
           </Form>
-
-          <div className="text-center space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/register">
-                <Button variant="link" className="p-0">
-                  Sign up
-                </Button>
-              </Link>
-            </p>
-            <Link to="/reset-password">
-              <Button variant="link" className="text-sm p-0">
-                Forgot your password?
-              </Button>
-            </Link>
-          </div>
         </div>
       </div>
     </div>
