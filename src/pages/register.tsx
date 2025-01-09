@@ -15,36 +15,43 @@ import { useToast } from "@/components/ui/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { Link } from "react-router-dom";
 
-const loginSchema = z.object({
+const registerSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const { toast } = useToast();
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit = async (data: RegisterFormValues) => {
     try {
-      // TODO: Implement actual authentication logic
-      console.log("Login data:", data);
+      // TODO: Implement actual registration logic
+      console.log("Registration data:", data);
       toast({
-        title: "Login Successful",
-        description: "Welcome back!",
+        title: "Registration Successful",
+        description: "Welcome to our platform!",
       });
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Invalid email or password",
+        description: "Registration failed. Please try again.",
       });
     }
   };
@@ -55,14 +62,31 @@ export default function LoginPage() {
       <div className="container mx-auto px-4 pt-24">
         <div className="max-w-md mx-auto space-y-6">
           <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold">Welcome Back</h1>
+            <h1 className="text-2xl font-bold">Create an Account</h1>
             <p className="text-muted-foreground">
-              Enter your credentials to access your account
+              Join our community and start making an impact
             </p>
           </div>
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter your full name"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="email"
@@ -90,7 +114,25 @@ export default function LoginPage() {
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Enter your password"
+                        placeholder="Create a password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Confirm your password"
                         {...field}
                       />
                     </FormControl>
@@ -100,23 +142,20 @@ export default function LoginPage() {
               />
 
               <Button type="submit" className="w-full">
-                Sign In
+                Create Account
               </Button>
             </form>
           </Form>
 
           <div className="text-center space-y-2">
             <p className="text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/register">
+              Already have an account?{" "}
+              <Link to="/login">
                 <Button variant="link" className="p-0">
-                  Sign up
+                  Sign in
                 </Button>
               </Link>
             </p>
-            <Button variant="link" className="text-sm p-0">
-              Forgot your password?
-            </Button>
           </div>
         </div>
       </div>
