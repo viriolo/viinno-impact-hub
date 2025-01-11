@@ -82,7 +82,7 @@ export default function LoginPage() {
             localization={{
               variables: {
                 sign_up: {
-                  password_placeholder: "Create a password",
+                  password_input_placeholder: "Create a password",
                   confirmation_text: "Confirm password",
                   confirmation_placeholder: "Re-enter your password",
                 },
