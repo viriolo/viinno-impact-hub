@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function Navigation() {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { toast } = useToast();
 
   const handleSignOut = async () => {
@@ -33,19 +34,26 @@ export function Navigation() {
             </span>
           </Link>
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" asChild>
-              <Link to="/about">About</Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link to="/impact">Impact</Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link to="/map">Map</Link>
-            </Button>
             {user ? (
-              <Button variant="default" onClick={handleSignOut}>
-                Sign Out
-              </Button>
+              <>
+                <Button variant="ghost" asChild>
+                  <Link to="/about">About</Link>
+                </Button>
+                <Button variant="ghost" asChild>
+                  <Link to="/impact">Impact</Link>
+                </Button>
+                <Button variant="ghost" asChild>
+                  <Link to="/map">Map</Link>
+                </Button>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-600">
+                    {user.email}
+                  </span>
+                  <Button variant="default" onClick={handleSignOut}>
+                    Sign Out
+                  </Button>
+                </div>
+              </>
             ) : (
               <Button variant="default" asChild>
                 <Link to="/login">Login</Link>
