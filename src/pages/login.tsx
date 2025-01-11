@@ -2,13 +2,54 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { Navigation } from "@/components/Navigation";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function LoginPage() {
   const { session } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Handle email confirmation
+    const handleEmailConfirmation = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+      const type = hashParams.get("type");
+
+      if (type === "email_confirmation" && accessToken) {
+        try {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || "",
+          });
+
+          if (error) throw error;
+
+          toast({
+            title: "Email confirmed",
+            description: "You can now sign in to your account",
+          });
+          
+          // Clear the URL hash
+          window.location.hash = "";
+        } catch (error) {
+          console.error("Error confirming email:", error);
+          toast({
+            variant: "destructive",
+            title: "Error confirming email",
+            description: "Please try signing in again or contact support",
+          });
+        }
+      }
+    };
+
+    handleEmailConfirmation();
+  }, [location, toast]);
 
   useEffect(() => {
     if (session) {
