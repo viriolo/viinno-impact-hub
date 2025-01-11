@@ -84,7 +84,6 @@ export default function LoginPage() {
                 sign_up: {
                   password_input_placeholder: "Create a password",
                   confirmation_text: "Confirm password",
-                  confirmation_placeholder: "Re-enter your password",
                 },
               },
             }}
