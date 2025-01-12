@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Share2, MapPin } from "lucide-react";
+import { Plus, Share2, MapPin, Edit } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Input } from "@/components/ui/input";
 
 interface ImpactCard {
   id: string;
@@ -19,12 +20,20 @@ interface ImpactCard {
 
 export default function ImpactCards() {
   const [cards, setCards] = useState<ImpactCard[]>([]);
+  const [filteredCards, setFilteredCards] = useState<ImpactCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCards();
   }, []);
+
+  useEffect(() => {
+    filterCards();
+  }, [searchTerm, locationFilter, cards]);
 
   const fetchCards = async () => {
     try {
@@ -36,6 +45,7 @@ export default function ImpactCards() {
       if (error) throw error;
 
       setCards(data || []);
+      setFilteredCards(data || []);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -47,6 +57,25 @@ export default function ImpactCards() {
     }
   };
 
+  const filterCards = () => {
+    let filtered = [...cards];
+    
+    if (searchTerm) {
+      filtered = filtered.filter(card => 
+        card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        card.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    if (locationFilter) {
+      filtered = filtered.filter(card => 
+        card.location?.toLowerCase().includes(locationFilter.toLowerCase())
+      );
+    }
+    
+    setFilteredCards(filtered);
+  };
+
   const handleShare = async (cardId: string) => {
     try {
       await supabase
@@ -54,7 +83,6 @@ export default function ImpactCards() {
         .update({ shares: cards.find(c => c.id === cardId)?.shares + 1 })
         .eq("id", cardId);
 
-      // Update local state
       setCards(cards.map(card =>
         card.id === cardId
           ? { ...card, shares: card.shares + 1 }
@@ -72,6 +100,10 @@ export default function ImpactCards() {
         description: "Failed to share impact card.",
       });
     }
+  };
+
+  const handleEdit = (cardId: string) => {
+    navigate(`/edit-impact-card/${cardId}`);
   };
 
   if (isLoading) {
@@ -94,8 +126,26 @@ export default function ImpactCards() {
         </Link>
       </div>
 
+      <div className="mb-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            placeholder="Search by title or description..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full"
+          />
+          <Input
+            placeholder="Filter by location..."
+            value={locationFilter}
+            onChange={(e) => setLocationFilter(e.target.value)}
+            className="w-full"
+            icon={<MapPin className="h-4 w-4" />}
+          />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cards.map((card) => (
+        {filteredCards.map((card) => (
           <Card key={card.id} className="card-hover">
             <CardHeader>
               <CardTitle className="text-xl">{card.title}</CardTitle>
@@ -120,29 +170,45 @@ export default function ImpactCards() {
                   <span>{card.views} views</span>
                   <span>{card.shares} shares</span>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleShare(card.id)}
-                >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleShare(card.id)}
+                  >
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEdit(card.id)}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {cards.length === 0 && (
+      {filteredCards.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No impact cards yet. Create your first one!</p>
-          <Link to="/create-impact-card">
-            <Button className="mt-4">
-              <Plus className="mr-2 h-5 w-5" />
-              Create Impact Card
-            </Button>
-          </Link>
+          <p className="text-muted-foreground">
+            {cards.length === 0 
+              ? "No impact cards yet. Create your first one!"
+              : "No cards match your search criteria."}
+          </p>
+          {cards.length === 0 && (
+            <Link to="/create-impact-card">
+              <Button className="mt-4">
+                <Plus className="mr-2 h-5 w-5" />
+                Create Impact Card
+              </Button>
+            </Link>
+          )}
         </div>
       )}
     </div>
