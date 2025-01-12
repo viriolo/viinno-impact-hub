@@ -11,10 +11,13 @@ export type Database = {
     Tables: {
       impact_cards: {
         Row: {
+          category: string | null
           created_at: string
           description: string | null
           id: string
+          latitude: number | null
           location: string | null
+          longitude: number | null
           media_url: string | null
           metrics: Json | null
           shares: number | null
@@ -25,10 +28,13 @@ export type Database = {
           views: number | null
         }
         Insert: {
+          category?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           media_url?: string | null
           metrics?: Json | null
           shares?: number | null
@@ -39,10 +45,13 @@ export type Database = {
           views?: number | null
         }
         Update: {
+          category?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           media_url?: string | null
           metrics?: Json | null
           shares?: number | null
