@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Share2, MapPin, Edit } from "lucide-react";
+import { Plus, Share2, MapPin, Edit, Search } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 
@@ -128,19 +128,24 @@ export default function ImpactCards() {
 
       <div className="mb-6 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            placeholder="Search by title or description..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full"
-          />
-          <Input
-            placeholder="Filter by location..."
-            value={locationFilter}
-            onChange={(e) => setLocationFilter(e.target.value)}
-            className="w-full"
-            icon={<MapPin className="h-4 w-4" />}
-          />
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by title or description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 w-full"
+            />
+          </div>
+          <div className="relative">
+            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Filter by location..."
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+              className="pl-9 w-full"
+            />
+          </div>
         </div>
       </div>
 
