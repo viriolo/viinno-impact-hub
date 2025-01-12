@@ -11,6 +11,7 @@ import RegisterPage from "./pages/register";
 import ResetPasswordPage from "./pages/reset-password";
 import ImpactCards from "./pages/impact-cards";
 import CreateImpactCard from "./pages/create-impact-card";
+import Map from "./components/Map";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CreateImpactCard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/map"
+              element={
+                <ProtectedRoute>
+                  <Map />
                 </ProtectedRoute>
               }
             />
