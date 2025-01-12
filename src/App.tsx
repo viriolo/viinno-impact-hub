@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import LoginPage from "./pages/login";
 import RegisterPage from "./pages/register";
 import ResetPasswordPage from "./pages/reset-password";
+import ImpactCards from "./pages/impact-cards";
+import CreateImpactCard from "./pages/create-impact-card";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,22 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route
+              path="/impact-cards"
+              element={
+                <ProtectedRoute>
+                  <ImpactCards />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/create-impact-card"
+              element={
+                <ProtectedRoute>
+                  <CreateImpactCard />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </AuthProvider>
       </BrowserRouter>

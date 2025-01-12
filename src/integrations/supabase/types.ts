@@ -9,6 +9,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      impact_cards: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          media_url: string | null
+          metrics: Json | null
+          shares: number | null
+          status: Database["public"]["Enums"]["card_status"] | null
+          title: string
+          updated_at: string
+          user_id: string | null
+          views: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          media_url?: string | null
+          metrics?: Json | null
+          shares?: number | null
+          status?: Database["public"]["Enums"]["card_status"] | null
+          title: string
+          updated_at?: string
+          user_id?: string | null
+          views?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          media_url?: string | null
+          metrics?: Json | null
+          shares?: number | null
+          status?: Database["public"]["Enums"]["card_status"] | null
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+          views?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -38,7 +83,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      card_status: "draft" | "published" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
