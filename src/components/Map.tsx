@@ -3,14 +3,18 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
 import { MapFilters } from './map/MapFilters';
+import { MapMarkers } from './map/MapMarkers';
+import { MapHeatLayer } from './map/MapHeatLayer';
+import { MapControls } from './map/MapControls';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
+import { ImpactCard } from '@/integrations/supabase/types';
 
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [markers, setMarkers] = useState<mapboxgl.Marker[]>([]);
   const [showHeatmap, setShowHeatmap] = useState(true);
+  const [impactCards, setImpactCards] = useState<ImpactCard[]>([]);
 
   const loadImpactCards = async (filters: {
     dateRange: DateRange | undefined;
@@ -38,53 +42,14 @@ const Map = () => {
         query = query.eq('user_id', filters.userId);
       }
 
-      const { data: impactCards, error } = await query;
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching impact cards:', error);
         return;
       }
 
-      // Clear existing markers
-      markers.forEach(marker => marker.remove());
-      setMarkers([]);
-
-      // Update heat map data
-      if (map.current?.getSource('impact-cards')) {
-        const geojsonData = {
-          type: 'FeatureCollection',
-          features: impactCards.map(card => ({
-            type: 'Feature',
-            properties: {
-              intensity: 1, // You can adjust this based on card metrics
-            },
-            geometry: {
-              type: 'Point',
-              coordinates: [card.longitude, card.latitude],
-            },
-          })),
-        };
-        (map.current.getSource('impact-cards') as mapboxgl.GeoJSONSource).setData(
-          geojsonData as any
-        );
-      }
-
-      // Add new markers
-      const newMarkers = impactCards.map(card => {
-        const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
-          `<h3 class="font-semibold">${card.title}</h3>
-           <p class="text-sm">${card.description || ''}</p>`
-        );
-
-        const marker = new mapboxgl.Marker()
-          .setLngLat([card.longitude, card.latitude])
-          .setPopup(popup)
-          .addTo(map.current!);
-
-        return marker;
-      });
-
-      setMarkers(newMarkers);
+      setImpactCards(data);
     } catch (error) {
       console.error('Error in loadImpactCards:', error);
     }
@@ -95,7 +60,6 @@ const Map = () => {
       if (!mapContainer.current) return;
 
       try {
-        // Fetch Mapbox token from Supabase Edge Function
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
         
         if (error) {
@@ -115,7 +79,6 @@ const Map = () => {
           pitch: 45,
         });
 
-        // Add navigation controls
         map.current.addControl(
           new mapboxgl.NavigationControl({
             visualizePitch: true,
@@ -123,19 +86,18 @@ const Map = () => {
           'top-right'
         );
 
-        // Disable scroll zoom for smoother experience
         map.current.scrollZoom.disable();
 
-        // Add atmosphere and fog effects
         map.current.on('style.load', () => {
-          map.current?.setFog({
+          if (!map.current) return;
+          
+          map.current.setFog({
             color: 'rgb(255, 255, 255)',
             'high-color': 'rgb(200, 200, 225)',
             'horizon-blend': 0.2,
           });
 
-          // Add heat map source and layer
-          map.current?.addSource('impact-cards', {
+          map.current.addSource('impact-cards', {
             type: 'geojson',
             data: {
               type: 'FeatureCollection',
@@ -143,12 +105,11 @@ const Map = () => {
             },
           });
 
-          map.current?.addLayer({
+          map.current.addLayer({
             id: 'impact-cards-heat',
             type: 'heatmap',
             source: 'impact-cards',
             paint: {
-              // Increase weight as magnitude increases
               'heatmap-weight': [
                 'interpolate',
                 ['linear'],
@@ -156,7 +117,6 @@ const Map = () => {
                 0, 0,
                 1, 1
               ],
-              // Increase intensity as zoom level increases
               'heatmap-intensity': [
                 'interpolate',
                 ['linear'],
@@ -164,7 +124,6 @@ const Map = () => {
                 0, 1,
                 9, 3
               ],
-              // Assign color values be applied to points depending on their density
               'heatmap-color': [
                 'interpolate',
                 ['linear'],
@@ -176,7 +135,6 @@ const Map = () => {
                 0.8, 'rgb(239,138,98)',
                 1, 'rgb(178,24,43)'
               ],
-              // Adjust the heatmap radius with zoom level
               'heatmap-radius': [
                 'interpolate',
                 ['linear'],
@@ -184,7 +142,6 @@ const Map = () => {
                 0, 2,
                 9, 20
               ],
-              // Transition from heatmap to circle layer by zoom level
               'heatmap-opacity': [
                 'interpolate',
                 ['linear'],
@@ -195,7 +152,6 @@ const Map = () => {
             },
           });
           
-          // Load initial markers
           loadImpactCards({
             dateRange: undefined,
             category: undefined,
@@ -211,7 +167,6 @@ const Map = () => {
     initializeMap();
 
     return () => {
-      markers.forEach(marker => marker.remove());
       map.current?.remove();
     };
   }, []);
@@ -221,18 +176,16 @@ const Map = () => {
       <MapFilters onFiltersChange={loadImpactCards} />
       <div ref={mapContainer} className="absolute inset-0 rounded-lg shadow-lg" />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent to-background/10 rounded-lg" />
-      <button
-        onClick={() => {
-          setShowHeatmap(!showHeatmap);
-          if (map.current) {
-            const opacity = showHeatmap ? 0 : 1;
-            map.current.setPaintProperty('impact-cards-heat', 'heatmap-opacity', opacity);
-          }
-        }}
-        className="absolute bottom-4 right-4 bg-white px-4 py-2 rounded-lg shadow-lg z-10 hover:bg-gray-50"
-      >
-        {showHeatmap ? 'Hide Heat Map' : 'Show Heat Map'}
-      </button>
+      <MapMarkers map={map.current} impactCards={impactCards} />
+      <MapHeatLayer 
+        map={map.current} 
+        impactCards={impactCards} 
+        visible={showHeatmap} 
+      />
+      <MapControls 
+        showHeatmap={showHeatmap}
+        onToggleHeatmap={() => setShowHeatmap(!showHeatmap)}
+      />
     </div>
   );
 };
