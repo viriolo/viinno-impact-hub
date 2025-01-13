@@ -100,6 +100,8 @@ export type Database = {
   }
 }
 
+export type ImpactCard = Database['public']['Tables']['impact_cards']['Row'];
+
 type PublicSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
