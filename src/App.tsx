@@ -33,17 +33,13 @@ const App = () => {
             <Toaster />
             <Sonner />
             <Routes>
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
-                }
-              />
+              {/* Public routes */}
+              <Route path="/" element={<Index />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              
+              {/* Protected routes */}
               <Route
                 path="/impact-cards"
                 element={
