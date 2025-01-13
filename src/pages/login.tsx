@@ -6,6 +6,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { Navigation } from "@/components/Navigation";
 import { useToast } from "@/components/ui/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AuthError } from "@supabase/supabase-js";
 
 export default function LoginPage() {
   const { session } = useAuth();
@@ -57,6 +59,21 @@ export default function LoginPage() {
     }
   }, [session, navigate]);
 
+  // Listen for auth state changes to handle errors
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'USER_UPDATED' && !session) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: "Invalid login credentials. Please check your email and password.",
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [toast]);
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -81,8 +98,15 @@ export default function LoginPage() {
                     },
                   },
                 },
+                className: {
+                  container: "space-y-4",
+                  button: "w-full px-4 py-2 bg-primary text-white rounded hover:bg-primary/90",
+                  input: "w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary",
+                  message: "text-sm text-red-500",
+                },
               }}
               providers={[]}
+              redirectTo={window.location.origin}
             />
           </div>
         </div>
