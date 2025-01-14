@@ -1,59 +1,46 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useUser } from "@supabase/auth-helpers-react";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Camera, Link as LinkIcon } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
-import { Button } from "@/components/ui/button";
+import { Loader2, Upload } from "lucide-react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
-import { supabase } from "@/integrations/supabase/client";
-
-const profileFormSchema = z.object({
-  username: z.string().min(3).max(50),
-  bio: z.string().max(500).optional(),
-  location: z.string().max(100).optional(),
-  website: z.string().url().optional().or(z.literal("")),
+const profileSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  bio: z.string().optional(),
+  location: z.string().optional(),
+  website: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   social_links: z.object({
-    twitter: z.string().url().optional().or(z.literal("")),
-    linkedin: z.string().url().optional().or(z.literal("")),
-    github: z.string().url().optional().or(z.literal(""))
-  }).optional()
+    twitter: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+    linkedin: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+    github: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  }),
 });
 
-type ProfileFormValues = z.infer<typeof profileFormSchema>;
+type ProfileFormValues = z.infer<typeof profileSchema>;
 
-export default function ProfilePage() {
-  const user = useUser();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+const ProfilePage = () => {
+  const { user } = useAuth();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!user) {
-      navigate("/login");
-    }
-  }, [user, navigate]);
-
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -65,41 +52,45 @@ export default function ProfilePage() {
       if (error) throw error;
       return data;
     },
-    enabled: !!user,
+    enabled: !!user?.id,
   });
 
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileFormSchema),
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
     defaultValues: {
-      username: "",
-      bio: "",
-      location: "",
-      website: "",
-      social_links: {
+      username: profile?.username || "",
+      bio: profile?.bio || "",
+      location: profile?.location || "",
+      website: profile?.website || "",
+      social_links: profile?.social_links || {
         twitter: "",
         linkedin: "",
-        github: ""
-      }
+        github: "",
+      },
     },
-    values: profile as ProfileFormValues,
   });
 
   const updateProfile = useMutation({
     mutationFn: async (values: ProfileFormValues) => {
       let avatarUrl = profile?.avatar_url;
 
+      // Upload avatar if changed
       if (avatarFile) {
-        const fileExt = avatarFile.name.split('.').pop();
-        const filePath = `${user?.id}/${Date.now()}.${fileExt}`;
+        const fileExt = avatarFile.name.split(".").pop();
+        const filePath = `${user?.id}/${Math.random()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
-          .from('avatars')
+          .from("avatars")
           .upload(filePath, avatarFile);
 
         if (uploadError) throw uploadError;
 
         const { data: { publicUrl } } = supabase.storage
-          .from('avatars')
+          .from("avatars")
           .getPublicUrl(filePath);
 
         avatarUrl = publicUrl;
@@ -117,19 +108,12 @@ export default function ProfilePage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated.",
-      });
+      queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
+      toast.success("Profile updated successfully");
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive",
-      });
-      console.error("Profile update error:", error);
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
     },
   });
 
@@ -137,177 +121,179 @@ export default function ProfilePage() {
     const file = event.target.files?.[0];
     if (file) {
       setAvatarFile(file);
-      const preview = URL.createObjectURL(file);
-      setAvatarPreview(preview);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  if (isLoading) {
+  const onSubmit = (values: ProfileFormValues) => {
+    updateProfile.mutate(values);
+  };
+
+  if (isLoadingProfile) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Card className="max-w-2xl mx-auto">
-          <CardContent className="p-6">
-            <div className="animate-pulse space-y-4">
-              <div className="h-32 w-32 rounded-full bg-gray-200 mx-auto" />
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-1/4" />
-                <div className="h-4 bg-gray-200 rounded w-1/2" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Card className="max-w-2xl mx-auto">
+    <div className="container max-w-2xl py-8">
+      <Card>
         <CardHeader>
-          <CardTitle>Edit Profile</CardTitle>
+          <CardTitle>Profile Settings</CardTitle>
+          <CardDescription>
+            Customize your profile information and appearance
+          </CardDescription>
         </CardHeader>
-        <CardContent className="p-6">
-          <div className="mb-6 flex flex-col items-center">
-            <Avatar className="h-32 w-32 mb-4">
-              <AvatarImage
-                src={avatarPreview || profile?.avatar_url}
-                alt={profile?.username || "Profile"}
-              />
-              <AvatarFallback>
-                {profile?.username?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex items-center gap-2">
-              <Input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                id="avatar-upload"
-                onChange={handleAvatarChange}
-              />
-              <Label
-                htmlFor="avatar-upload"
-                className="cursor-pointer inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                <Camera className="h-4 w-4" />
-                Change Avatar
-              </Label>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="flex flex-col items-center space-y-4">
+              <Avatar className="h-24 w-24">
+                <AvatarImage
+                  src={avatarPreview || profile?.avatar_url}
+                  alt="Profile"
+                />
+                <AvatarFallback>
+                  {profile?.username?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex items-center space-x-2">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  className="hidden"
+                  id="avatar-upload"
+                />
+                <Label
+                  htmlFor="avatar-upload"
+                  className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload Avatar
+                </Label>
+              </div>
             </div>
-          </div>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit((data) => updateProfile.mutate(data))} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="bio"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bio</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="website"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Website</FormLabel>
-                    <FormControl>
-                      <div className="flex items-center gap-2">
-                        <LinkIcon className="h-4 w-4 text-muted-foreground" />
-                        <Input {...field} type="url" />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Social Links</h3>
-                <FormField
-                  control={form.control}
-                  name="social_links.twitter"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Twitter</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="url" placeholder="https://twitter.com/username" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  {...register("username")}
+                  className="mt-1"
                 />
+                {errors.username && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {errors.username.message}
+                  </p>
+                )}
+              </div>
 
-                <FormField
-                  control={form.control}
-                  name="social_links.linkedin"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>LinkedIn</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="url" placeholder="https://linkedin.com/in/username" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="social_links.github"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>GitHub</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="url" placeholder="https://github.com/username" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <div>
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea
+                  id="bio"
+                  {...register("bio")}
+                  className="mt-1"
+                  rows={4}
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={updateProfile.isPending}>
-                {updateProfile.isPending ? "Saving..." : "Save Changes"}
-              </Button>
-            </form>
-          </Form>
+              <div>
+                <Label htmlFor="location">Location</Label>
+                <Input
+                  id="location"
+                  {...register("location")}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="website">Website</Label>
+                <Input
+                  id="website"
+                  {...register("website")}
+                  className="mt-1"
+                  type="url"
+                />
+                {errors.website && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {errors.website.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Social Links</h3>
+                
+                <div>
+                  <Label htmlFor="twitter">Twitter</Label>
+                  <Input
+                    id="twitter"
+                    {...register("social_links.twitter")}
+                    className="mt-1"
+                    type="url"
+                  />
+                  {errors.social_links?.twitter && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.social_links.twitter.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="linkedin">LinkedIn</Label>
+                  <Input
+                    id="linkedin"
+                    {...register("social_links.linkedin")}
+                    className="mt-1"
+                    type="url"
+                  />
+                  {errors.social_links?.linkedin && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.social_links.linkedin.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="github">GitHub</Label>
+                  <Input
+                    id="github"
+                    {...register("social_links.github")}
+                    className="mt-1"
+                    type="url"
+                  />
+                  {errors.social_links?.github && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.social_links.github.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={updateProfile.isPending}
+            >
+              {updateProfile.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Save Changes
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>
   );
-}
+};
+
+export default ProfilePage;

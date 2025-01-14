@@ -13,6 +13,7 @@ import ResetPasswordPage from "./pages/reset-password";
 import ImpactCards from "./pages/impact-cards";
 import CreateImpactCard from "./pages/create-impact-card";
 import Map from "./components/Map";
+import ProfilePage from "./pages/profile";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -40,6 +41,14 @@ const App = () => {
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               
               {/* Protected routes */}
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/impact-cards"
                 element={
