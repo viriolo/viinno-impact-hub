@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ interface SocialLinks {
 
 const ProfilePage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -117,6 +119,7 @@ const ProfilePage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
       toast.success("Profile updated successfully");
+      navigate(`/profile/${user?.id}`); // Redirect to profile view
     },
     onError: (error) => {
       console.error("Error updating profile:", error);
