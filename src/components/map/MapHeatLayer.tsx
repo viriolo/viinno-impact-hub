@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
-import { ImpactCard } from '@/integrations/supabase/types';
+import { ImpactCard } from '@/integrations/supabase/types/models.types';
 
 interface MapHeatLayerProps {
   map: mapboxgl.Map | null;

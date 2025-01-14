@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
-import { ImpactCard } from '@/integrations/supabase/types';
+import { ImpactCard } from '@/integrations/supabase/types/models.types';
 
 interface MapMarkersProps {
   map: mapboxgl.Map | null;

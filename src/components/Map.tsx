@@ -8,7 +8,7 @@ import { MapHeatLayer } from './map/MapHeatLayer';
 import { MapControls } from './map/MapControls';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
-import { ImpactCard } from '@/integrations/supabase/types';
+import { ImpactCard } from '@/integrations/supabase/types/models.types';
 
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
