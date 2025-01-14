@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(false);
       
       if (session) {
-        navigate("/");
+        navigate("/profile");
       }
     });
 
