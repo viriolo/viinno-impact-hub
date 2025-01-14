@@ -4,6 +4,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LayoutDashboard } from "lucide-react";
 
 export function Navigation() {
   const { user, session } = useAuth();
@@ -36,6 +37,12 @@ export function Navigation() {
           <div className="flex items-center space-x-4">
             {user ? (
               <>
+                <Button variant="ghost" asChild>
+                  <Link to="/dashboard" className="flex items-center gap-2">
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Link>
+                </Button>
                 <Button variant="ghost" asChild>
                   <Link to="/about">About</Link>
                 </Button>
