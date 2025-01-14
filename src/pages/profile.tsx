@@ -119,7 +119,8 @@ const ProfilePage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
       toast.success("Profile updated successfully");
-      navigate(`/profile/${user?.id}`); // Redirect to profile view
+      // Changed from profile/:id to /dashboard
+      navigate("/dashboard");
     },
     onError: (error) => {
       console.error("Error updating profile:", error);

@@ -58,6 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(false);
       
       if (session) {
+        // Changed from /profile/:id to /profile
         navigate("/profile");
       } else if (event === 'SIGNED_OUT') {
         navigate("/login");
