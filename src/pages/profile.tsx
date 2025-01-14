@@ -34,6 +34,12 @@ const profileSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
+interface SocialLinks {
+  twitter?: string;
+  linkedin?: string;
+  github?: string;
+}
+
 const ProfilePage = () => {
   const { user } = useAuth();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -55,6 +61,12 @@ const ProfilePage = () => {
     enabled: !!user?.id,
   });
 
+  const defaultSocialLinks: SocialLinks = {
+    twitter: "",
+    linkedin: "",
+    github: "",
+  };
+
   const {
     register,
     handleSubmit,
@@ -66,11 +78,7 @@ const ProfilePage = () => {
       bio: profile?.bio || "",
       location: profile?.location || "",
       website: profile?.website || "",
-      social_links: profile?.social_links || {
-        twitter: "",
-        linkedin: "",
-        github: "",
-      },
+      social_links: (profile?.social_links as SocialLinks) || defaultSocialLinks,
     },
   });
 
@@ -78,7 +86,6 @@ const ProfilePage = () => {
     mutationFn: async (values: ProfileFormValues) => {
       let avatarUrl = profile?.avatar_url;
 
-      // Upload avatar if changed
       if (avatarFile) {
         const fileExt = avatarFile.name.split(".").pop();
         const filePath = `${user?.id}/${Math.random()}.${fileExt}`;
