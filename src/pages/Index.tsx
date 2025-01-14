@@ -1,3 +1,4 @@
+import { Navigation } from "@/components/Navigation";
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { ActivityFeed } from "@/components/ActivityFeed";
@@ -8,13 +9,16 @@ export default function Index() {
 
   return (
     <div className="min-h-screen">
-      <Hero />
-      <Features />
-      {user && (
-        <div className="container mx-auto px-4 py-8">
-          <ActivityFeed />
-        </div>
-      )}
+      <Navigation />
+      <main className="pt-16">
+        <Hero />
+        <Features />
+        {user && (
+          <div className="container mx-auto px-4 py-8">
+            <ActivityFeed />
+          </div>
+        )}
+      </main>
     </div>
   );
 }
