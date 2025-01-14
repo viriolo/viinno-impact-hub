@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type AuthContextType = {
   user: User | null;
@@ -23,7 +24,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error("Error getting session:", error);
+        toast.error("Session error. Please sign in again.");
+        return;
+      }
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
@@ -32,13 +38,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state change:", event);
+      
+      if (event === 'TOKEN_REFRESHED') {
+        if (!session) {
+          // Token refresh failed
+          console.log("Token refresh failed");
+          setSession(null);
+          setUser(null);
+          toast.error("Your session has expired. Please sign in again.");
+          navigate("/login");
+          return;
+        }
+      }
+
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
       
       if (session) {
         navigate("/profile");
+      } else if (event === 'SIGNED_OUT') {
+        navigate("/login");
       }
     });
 
