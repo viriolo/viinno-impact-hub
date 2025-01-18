@@ -17,7 +17,12 @@ export function Hero() {
             <Button size="lg" className="bg-white text-primary hover:bg-gray-100" asChild>
               <Link to="/register">Join the Community</Link>
             </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" asChild>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="bg-white/10 border-white text-white hover:bg-white hover:text-primary transition-colors" 
+              asChild
+            >
               <Link to="/about">Learn More</Link>
             </Button>
           </div>
