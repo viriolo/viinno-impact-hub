@@ -5,6 +5,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Activity, History, MessageCircle, ThumbsUp, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 type ActivityItem = {
   id: string;
@@ -43,23 +53,39 @@ const formatActivityMessage = (activity: ActivityItem) => {
   }
 };
 
+const ITEMS_PER_PAGE = 5;
+
 export function ActivityFeed() {
   const { user } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: activities, isLoading, error } = useQuery({
-    queryKey: ["activities", user?.id],
+    queryKey: ["activities", user?.id, searchTerm],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("user_activities")
         .select("*")
-        .order("created_at", { ascending: false })
-        .limit(10);
+        .order("created_at", { ascending: false });
+
+      if (searchTerm) {
+        query = query.or(`metadata->title.ilike.%${searchTerm}%,activity_type.ilike.%${searchTerm}%`);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return data as ActivityItem[];
     },
     enabled: !!user,
   });
+
+  const filteredActivities = activities || [];
+  const totalPages = Math.ceil(filteredActivities.length / ITEMS_PER_PAGE);
+  const paginatedActivities = filteredActivities.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   if (error) {
     return (
@@ -75,6 +101,19 @@ export function ActivityFeed() {
     <Card className="w-full max-w-md mx-auto">
       <CardContent className="p-4">
         <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+        
+        <div className="mb-4">
+          <Input
+            placeholder="Search activities..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1); // Reset to first page on search
+            }}
+            className="w-full"
+          />
+        </div>
+
         <ScrollArea className="h-[400px] pr-4">
           {isLoading ? (
             <div className="space-y-4">
@@ -90,7 +129,7 @@ export function ActivityFeed() {
             </div>
           ) : (
             <div className="space-y-4">
-              {activities?.map((activity) => (
+              {paginatedActivities.map((activity) => (
                 <div
                   key={activity.id}
                   className="flex items-start space-x-4 p-3 rounded-lg hover:bg-muted/50 transition-colors"
@@ -106,14 +145,45 @@ export function ActivityFeed() {
                   </div>
                 </div>
               ))}
-              {activities?.length === 0 && (
+              {paginatedActivities.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  No recent activity
+                  {searchTerm ? "No matching activities found" : "No recent activity"}
                 </p>
               )}
             </div>
           )}
         </ScrollArea>
+
+        {totalPages > 1 && (
+          <div className="mt-4">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                {[...Array(totalPages)].map((_, i) => (
+                  <PaginationItem key={i + 1}>
+                    <PaginationLink
+                      onClick={() => setCurrentPage(i + 1)}
+                      isActive={currentPage === i + 1}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
