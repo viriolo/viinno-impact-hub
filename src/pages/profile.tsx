@@ -18,7 +18,7 @@ import {
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { SocialLinksForm } from "@/components/profile/SocialLinksForm";
-import { profileSchema, type ProfileFormValues, type SocialLinks } from "@/types/profile";
+import { profileSchema, type ProfileFormValues } from "@/types/profile";
 
 const ProfilePage = () => {
   const { user } = useAuth();
@@ -29,28 +29,29 @@ const ProfilePage = () => {
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
+      console.log("Fetching profile for user:", user?.id);
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user?.id)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching profile:", error);
+        throw error;
+      }
+      
+      console.log("Profile data:", data);
       return data;
     },
     enabled: !!user?.id,
   });
 
-  const defaultSocialLinks: SocialLinks = {
-    twitter: "",
-    linkedin: "",
-    github: "",
-  };
-
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -58,9 +59,30 @@ const ProfilePage = () => {
       bio: profile?.bio || "",
       location: profile?.location || "",
       website: profile?.website || "",
-      social_links: (profile?.social_links as SocialLinks) || defaultSocialLinks,
+      social_links: profile?.social_links || {
+        twitter: "",
+        linkedin: "",
+        github: "",
+      },
     },
   });
+
+  // Reset form when profile data is loaded
+  React.useEffect(() => {
+    if (profile) {
+      reset({
+        username: profile.username || "",
+        bio: profile.bio || "",
+        location: profile.location || "",
+        website: profile.website || "",
+        social_links: profile.social_links || {
+          twitter: "",
+          linkedin: "",
+          github: "",
+        },
+      });
+    }
+  }, [profile, reset]);
 
   const updateProfile = useMutation({
     mutationFn: async (values: ProfileFormValues) => {
@@ -97,7 +119,7 @@ const ProfilePage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
       toast.success("Profile updated successfully");
-      navigate("/dashboard"); // Changed from /profile to /dashboard
+      navigate("/dashboard");
     },
     onError: (error) => {
       console.error("Error updating profile:", error);
@@ -117,6 +139,21 @@ const ProfilePage = () => {
     );
   }
 
+  if (!profile) {
+    return (
+      <div className="container max-w-2xl py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Profile Not Found</CardTitle>
+            <CardDescription>
+              We couldn't find your profile. Please try refreshing the page.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="container max-w-2xl py-8">
       <Card>
@@ -129,8 +166,8 @@ const ProfilePage = () => {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <ProfileAvatar
-              avatarUrl={profile?.avatar_url}
-              username={profile?.username}
+              avatarUrl={profile.avatar_url}
+              username={profile.username}
               email={user?.email}
               onAvatarChange={(file) => setAvatarFile(file)}
             />
