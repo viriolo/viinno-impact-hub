@@ -24,16 +24,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.error("Error getting session:", error);
-        toast.error("Session error. Please sign in again.");
-        return;
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Error getting session:", error);
+          toast.error("Session error. Please sign in again.");
+          return;
+        }
+        
+        if (session) {
+          setSession(session);
+          setUser(session.user);
+        }
+      } catch (error) {
+        console.error("Error initializing auth:", error);
+        toast.error("Authentication error. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-    });
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
     const {
@@ -43,7 +55,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (event === 'TOKEN_REFRESHED') {
         if (!session) {
-          // Token refresh failed
           console.log("Token refresh failed");
           setSession(null);
           setUser(null);
@@ -58,14 +69,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(false);
       
       if (session) {
-        // Changed from /profile/:id to /profile
         navigate("/profile");
       } else if (event === 'SIGNED_OUT') {
         navigate("/login");
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   if (isLoading) {
