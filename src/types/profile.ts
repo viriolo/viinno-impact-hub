@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+export interface SocialLinks {
+  twitter?: string;
+  linkedin?: string;
+  github?: string;
+}
+
 export const profileSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   bio: z.string().optional(),
@@ -13,9 +19,3 @@ export const profileSchema = z.object({
 });
 
 export type ProfileFormValues = z.infer<typeof profileSchema>;
-
-export interface SocialLinks {
-  twitter?: string;
-  linkedin?: string;
-  github?: string;
-}

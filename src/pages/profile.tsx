@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/components/AuthProvider";
@@ -18,7 +18,7 @@ import {
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { SocialLinksForm } from "@/components/profile/SocialLinksForm";
-import { profileSchema, type ProfileFormValues } from "@/types/profile";
+import { profileSchema, type ProfileFormValues, type SocialLinks } from "@/types/profile";
 
 const ProfilePage = () => {
   const { user } = useAuth();
@@ -47,6 +47,12 @@ const ProfilePage = () => {
     enabled: !!user?.id,
   });
 
+  const defaultSocialLinks: SocialLinks = {
+    twitter: "",
+    linkedin: "",
+    github: "",
+  };
+
   const {
     register,
     handleSubmit,
@@ -59,11 +65,7 @@ const ProfilePage = () => {
       bio: profile?.bio || "",
       location: profile?.location || "",
       website: profile?.website || "",
-      social_links: profile?.social_links || {
-        twitter: "",
-        linkedin: "",
-        github: "",
-      },
+      social_links: (profile?.social_links as SocialLinks) || defaultSocialLinks,
     },
   });
 
@@ -75,11 +77,7 @@ const ProfilePage = () => {
         bio: profile.bio || "",
         location: profile.location || "",
         website: profile.website || "",
-        social_links: profile.social_links || {
-          twitter: "",
-          linkedin: "",
-          github: "",
-        },
+        social_links: (profile.social_links as SocialLinks) || defaultSocialLinks,
       });
     }
   }, [profile, reset]);
