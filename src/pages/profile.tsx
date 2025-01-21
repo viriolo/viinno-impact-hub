@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/components/AuthProvider";
@@ -25,9 +25,9 @@ const isSocialLinks = (value: unknown): value is SocialLinks => {
   if (typeof value !== 'object' || value === null) return false;
   const socialLinks = value as Record<string, unknown>;
   return (
-    typeof socialLinks.twitter === 'string' || socialLinks.twitter === undefined &&
-    typeof socialLinks.linkedin === 'string' || socialLinks.linkedin === undefined &&
-    typeof socialLinks.github === 'string' || socialLinks.github === undefined
+    (typeof socialLinks.twitter === 'string' || socialLinks.twitter === undefined) &&
+    (typeof socialLinks.linkedin === 'string' || socialLinks.linkedin === undefined) &&
+    (typeof socialLinks.github === 'string' || socialLinks.github === undefined)
   );
 };
 
@@ -81,7 +81,7 @@ const ProfilePage = () => {
   });
 
   // Reset form when profile data is loaded
-  React.useEffect(() => {
+  useEffect(() => {
     if (profile) {
       reset({
         username: profile.username || "",
