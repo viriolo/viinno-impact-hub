@@ -13,6 +13,8 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 export interface AppRoute extends RouteObject {
   requiresAuth?: boolean;
   title?: string;
+  path: string;  // Make path required
+  element: React.ReactNode;  // Make element required
 }
 
 export const publicRoutes: AppRoute[] = [
@@ -71,7 +73,7 @@ export const protectedRoutes: AppRoute[] = [
   },
 ];
 
-export const routes: AppRoute[] = [
+export const routes: RouteObject[] = [
   ...publicRoutes,
   ...protectedRoutes.map(route => ({
     ...route,

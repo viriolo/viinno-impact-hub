@@ -38,19 +38,17 @@ export function Navigation() {
             {user ? (
               <>
                 {protectedRoutes.map((route) => (
-                  route.path && (
-                    <Button
-                      key={route.path}
-                      variant="ghost"
-                      asChild
-                      className="hover:bg-primary/5"
-                    >
-                      <Link to={route.path} className="flex items-center gap-2">
-                        {route.path === "/dashboard" && <LayoutDashboard className="h-4 w-4" />}
-                        {route.title}
-                      </Link>
-                    </Button>
-                  )
+                  <Button
+                    key={route.path}
+                    variant="ghost"
+                    asChild
+                    className="hover:bg-primary/5"
+                  >
+                    <Link to={route.path} className="flex items-center gap-2">
+                      {route.path === "/dashboard" && <LayoutDashboard className="h-4 w-4" />}
+                      {route.title}
+                    </Link>
+                  </Button>
                 ))}
                 <div className="flex items-center space-x-4 border-l pl-4">
                   <span className="text-sm text-gray-600">
