@@ -15,9 +15,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { SocialLinksForm } from "@/components/profile/SocialLinksForm";
+import { AdditionalProfileForm } from "@/components/profile/AdditionalProfileForm";
 import { profileSchema, type ProfileFormValues, type SocialLinks } from "@/types/profile";
 
 const isSocialLinks = (value: unknown): value is SocialLinks => {
@@ -42,12 +44,10 @@ const ProfilePage = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
-  // Fetch profile data
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) throw new Error("No user ID");
-      console.log("Fetching profile for user:", user.id);
       
       const { data, error } = await supabase
         .from("profiles")
@@ -55,36 +55,8 @@ const ProfilePage = () => {
         .eq("id", user.id)
         .single();
 
-      if (error) {
-        console.error("Error fetching profile:", error);
-        throw error;
-      }
-      
-      console.log("Profile data:", data);
+      if (error) throw error;
       return data;
-    },
-    enabled: !!user?.id,
-    retry: 1,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-
-  // Fetch followers count
-  const { data: followersCount } = useQuery({
-    queryKey: ["followers", user?.id],
-    queryFn: async () => {
-      if (!user?.id) return 0;
-      
-      const { count, error } = await supabase
-        .from("followers")
-        .select("*", { count: 'exact', head: true })
-        .eq("following_id", user.id);
-        
-      if (error) {
-        console.error("Error fetching followers:", error);
-        throw error;
-      }
-      
-      return count || 0;
     },
     enabled: !!user?.id,
   });
@@ -102,6 +74,14 @@ const ProfilePage = () => {
       location: profile?.location || "",
       website: profile?.website || "",
       social_links: isSocialLinks(profile?.social_links) ? profile.social_links : defaultSocialLinks,
+      academic_background: profile?.academic_background || "",
+      professional_background: profile?.professional_background || "",
+      expertise_areas: profile?.expertise_areas || [],
+      organization_name: profile?.organization_name || "",
+      organization_type: profile?.organization_type || "",
+      organization_description: profile?.organization_description || "",
+      skills: profile?.skills || [],
+      interests: profile?.interests || [],
     },
   });
 
@@ -113,6 +93,14 @@ const ProfilePage = () => {
         location: profile.location || "",
         website: profile.website || "",
         social_links: isSocialLinks(profile.social_links) ? profile.social_links : defaultSocialLinks,
+        academic_background: profile.academic_background || "",
+        professional_background: profile.professional_background || "",
+        expertise_areas: profile.expertise_areas || [],
+        organization_name: profile.organization_name || "",
+        organization_type: profile.organization_type || "",
+        organization_description: profile.organization_description || "",
+        skills: profile.skills || [],
+        interests: profile.interests || [],
       });
     }
   }, [profile, reset]);
@@ -174,21 +162,6 @@ const ProfilePage = () => {
     );
   }
 
-  if (!profile) {
-    return (
-      <div className="container max-w-2xl py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile Not Found</CardTitle>
-            <CardDescription>
-              We couldn't find your profile. Please try refreshing the page.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="container max-w-2xl py-8">
       <Card>
@@ -196,25 +169,36 @@ const ProfilePage = () => {
           <CardTitle>Profile Settings</CardTitle>
           <CardDescription>
             Customize your profile information and appearance
-            {followersCount !== undefined && followersCount > 0 && (
-              <div className="mt-2 text-sm text-muted-foreground">
-                {followersCount} follower{followersCount === 1 ? '' : 's'}
-              </div>
-            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <ProfileAvatar
-              avatarUrl={profile.avatar_url}
-              username={profile.username}
+              avatarUrl={profile?.avatar_url}
+              username={profile?.username}
               email={user?.email}
               onAvatarChange={(file) => setAvatarFile(file)}
             />
 
-            <ProfileForm register={register} errors={errors} />
-            
-            <SocialLinksForm register={register} errors={errors} />
+            <Tabs defaultValue="basic" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                <TabsTrigger value="additional">Additional Info</TabsTrigger>
+                <TabsTrigger value="social">Social Links</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="basic">
+                <ProfileForm register={register} errors={errors} />
+              </TabsContent>
+              
+              <TabsContent value="additional">
+                <AdditionalProfileForm register={register} errors={errors} />
+              </TabsContent>
+              
+              <TabsContent value="social">
+                <SocialLinksForm register={register} errors={errors} />
+              </TabsContent>
+            </Tabs>
 
             <Button
               type="submit"

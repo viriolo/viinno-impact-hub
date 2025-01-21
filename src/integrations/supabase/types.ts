@@ -107,30 +107,57 @@ export type Database = {
       }
       profiles: {
         Row: {
+          academic_background: string | null
+          availability: Json | null
           avatar_url: string | null
           bio: string | null
+          expertise_areas: string[] | null
           id: string
+          interests: string[] | null
           location: string | null
+          organization_description: string | null
+          organization_name: string | null
+          organization_type: string | null
+          professional_background: string | null
+          skills: string[] | null
           social_links: Json | null
           updated_at: string | null
           username: string | null
           website: string | null
         }
         Insert: {
+          academic_background?: string | null
+          availability?: Json | null
           avatar_url?: string | null
           bio?: string | null
+          expertise_areas?: string[] | null
           id: string
+          interests?: string[] | null
           location?: string | null
+          organization_description?: string | null
+          organization_name?: string | null
+          organization_type?: string | null
+          professional_background?: string | null
+          skills?: string[] | null
           social_links?: Json | null
           updated_at?: string | null
           username?: string | null
           website?: string | null
         }
         Update: {
+          academic_background?: string | null
+          availability?: Json | null
           avatar_url?: string | null
           bio?: string | null
+          expertise_areas?: string[] | null
           id?: string
+          interests?: string[] | null
           location?: string | null
+          organization_description?: string | null
+          organization_name?: string | null
+          organization_type?: string | null
+          professional_background?: string | null
+          skills?: string[] | null
           social_links?: Json | null
           updated_at?: string | null
           username?: string | null
@@ -188,6 +215,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -201,6 +249,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "scholar" | "mentor" | "csr_funder" | "ngo"
       card_status: "draft" | "published" | "archived"
     }
     CompositeTypes: {

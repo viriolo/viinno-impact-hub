@@ -59,6 +59,26 @@ export const ProfileForm = ({ register, errors }: ProfileFormProps) => {
           </p>
         )}
       </div>
+
+      <div>
+        <Label htmlFor="skills">Skills (comma-separated)</Label>
+        <Input
+          id="skills"
+          {...register("skills")}
+          className="mt-1"
+          placeholder="e.g., Project Management, Research, Data Analysis"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="interests">Interests (comma-separated)</Label>
+        <Input
+          id="interests"
+          {...register("interests")}
+          className="mt-1"
+          placeholder="e.g., Sustainable Development, Education, Healthcare"
+        />
+      </div>
     </div>
   );
 };
