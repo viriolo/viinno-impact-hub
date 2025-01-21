@@ -10,12 +10,10 @@ import ProfilePage from "@/pages/profile";
 import Dashboard from "@/pages/dashboard";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
-export interface AppRoute extends RouteObject {
+export type AppRoute = RouteObject & {
   requiresAuth?: boolean;
   title?: string;
-  path: string;  // Make path required
-  element: React.ReactNode;  // Make element required
-}
+};
 
 export const publicRoutes: AppRoute[] = [
   {

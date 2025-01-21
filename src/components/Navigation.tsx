@@ -1,40 +1,21 @@
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { LayoutDashboard, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { LayoutDashboard } from "lucide-react";
 import { protectedRoutes } from "@/config/routes";
 
-export function Navigation() {
+export const Navigation = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
-
-  const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error signing out",
-        description: error.message,
-      });
-    } else {
-      toast({
-        title: "Signed out successfully",
-      });
-    }
-  };
 
   return (
-    <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b shadow-sm">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-2 group">
-            <span className="text-2xl font-heading font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
-              Viinno
-            </span>
-          </Link>
-          <div className="flex items-center space-x-6">
+    <nav className="border-b">
+      <div className="container flex h-16 items-center px-4">
+        <Link to="/" className="font-bold">
+          Impact
+        </Link>
+
+        <div className="ml-auto flex items-center space-x-4">
+          <div className="flex items-center space-x-4">
             {user ? (
               <>
                 {protectedRoutes.map((route) => (
@@ -54,18 +35,10 @@ export function Navigation() {
                   <span className="text-sm text-gray-600">
                     {user.email}
                   </span>
-                  <Button 
-                    variant="outline" 
-                    onClick={handleSignOut}
-                    className="flex items-center gap-2 hover:bg-destructive/5 hover:text-destructive"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Sign Out
-                  </Button>
                 </div>
               </>
             ) : (
-              <Button variant="default" asChild className="shadow-md hover:shadow-lg transition-shadow">
+              <Button asChild variant="ghost">
                 <Link to="/login">Login</Link>
               </Button>
             )}
@@ -74,4 +47,4 @@ export function Navigation() {
       </div>
     </nav>
   );
-}
+};
