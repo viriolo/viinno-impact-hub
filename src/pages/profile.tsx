@@ -4,39 +4,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
-import { ProfileForm } from "@/components/profile/ProfileForm";
-import { SocialLinksForm } from "@/components/profile/SocialLinksForm";
-import { AdditionalProfileForm } from "@/components/profile/AdditionalProfileForm";
-import { profileSchema, type ProfileFormValues, type SocialLinks } from "@/types/profile";
-
-const isSocialLinks = (value: unknown): value is SocialLinks => {
-  if (typeof value !== 'object' || value === null) return false;
-  const socialLinks = value as Record<string, unknown>;
-  return (
-    (typeof socialLinks.twitter === 'string' || socialLinks.twitter === undefined) &&
-    (typeof socialLinks.linkedin === 'string' || socialLinks.linkedin === undefined) &&
-    (typeof socialLinks.github === 'string' || socialLinks.github === undefined)
-  );
-};
-
-const defaultSocialLinks: SocialLinks = {
-  twitter: "",
-  linkedin: "",
-  github: "",
-};
+import { ProfileHeader } from "@/components/profile/ProfileHeader";
+import { ProfileTabs } from "@/components/profile/ProfileTabs";
+import { ProfileActions } from "@/components/profile/ProfileActions";
+import { profileSchema, type ProfileFormValues } from "@/types/profile";
+import { Loader2 } from "lucide-react";
 
 const ProfilePage = () => {
   const { user } = useAuth();
@@ -48,13 +24,11 @@ const ProfilePage = () => {
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) throw new Error("No user ID");
-      
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .single();
-
       if (error) throw error;
       return data;
     },
@@ -68,21 +42,6 @@ const ProfilePage = () => {
     reset,
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
-    defaultValues: {
-      username: profile?.username || "",
-      bio: profile?.bio || "",
-      location: profile?.location || "",
-      website: profile?.website || "",
-      social_links: isSocialLinks(profile?.social_links) ? profile.social_links : defaultSocialLinks,
-      academic_background: profile?.academic_background || "",
-      professional_background: profile?.professional_background || "",
-      expertise_areas: profile?.expertise_areas || [],
-      organization_name: profile?.organization_name || "",
-      organization_type: profile?.organization_type || "",
-      organization_description: profile?.organization_description || "",
-      skills: profile?.skills || [],
-      interests: profile?.interests || [],
-    },
   });
 
   useEffect(() => {
@@ -92,7 +51,7 @@ const ProfilePage = () => {
         bio: profile.bio || "",
         location: profile.location || "",
         website: profile.website || "",
-        social_links: isSocialLinks(profile.social_links) ? profile.social_links : defaultSocialLinks,
+        social_links: profile.social_links || {},
         academic_background: profile.academic_background || "",
         professional_background: profile.professional_background || "",
         expertise_areas: profile.expertise_areas || [],
@@ -110,21 +69,16 @@ const ProfilePage = () => {
       if (!user?.id) throw new Error("No user ID");
       
       let avatarUrl = profile?.avatar_url;
-
       if (avatarFile) {
         const fileExt = avatarFile.name.split(".").pop();
         const filePath = `${user.id}/${Math.random()}.${fileExt}`;
-
         const { error: uploadError } = await supabase.storage
           .from("avatars")
           .upload(filePath, avatarFile);
-
         if (uploadError) throw uploadError;
-
         const { data: { publicUrl } } = supabase.storage
           .from("avatars")
           .getPublicUrl(filePath);
-
         avatarUrl = publicUrl;
       }
 
@@ -165,12 +119,7 @@ const ProfilePage = () => {
   return (
     <div className="container max-w-2xl py-8">
       <Card>
-        <CardHeader>
-          <CardTitle>Profile Settings</CardTitle>
-          <CardDescription>
-            Customize your profile information and appearance
-          </CardDescription>
-        </CardHeader>
+        <ProfileHeader />
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <ProfileAvatar
@@ -179,37 +128,8 @@ const ProfilePage = () => {
               email={user?.email}
               onAvatarChange={(file) => setAvatarFile(file)}
             />
-
-            <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                <TabsTrigger value="additional">Additional Info</TabsTrigger>
-                <TabsTrigger value="social">Social Links</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="basic">
-                <ProfileForm register={register} errors={errors} />
-              </TabsContent>
-              
-              <TabsContent value="additional">
-                <AdditionalProfileForm register={register} errors={errors} />
-              </TabsContent>
-              
-              <TabsContent value="social">
-                <SocialLinksForm register={register} errors={errors} />
-              </TabsContent>
-            </Tabs>
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={updateProfile.isPending}
-            >
-              {updateProfile.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Save Changes
-            </Button>
+            <ProfileTabs register={register} errors={errors} />
+            <ProfileActions isSubmitting={updateProfile.isPending} />
           </form>
         </CardContent>
       </Card>
