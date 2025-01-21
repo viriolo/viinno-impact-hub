@@ -11,7 +11,7 @@ import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileTabs } from "@/components/profile/ProfileTabs";
 import { ProfileActions } from "@/components/profile/ProfileActions";
-import { profileSchema, type ProfileFormValues } from "@/types/profile";
+import { profileSchema, type ProfileFormValues, type SocialLinks } from "@/types/profile";
 import { Loader2 } from "lucide-react";
 
 const ProfilePage = () => {
@@ -46,12 +46,17 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (profile) {
+      const socialLinks = (profile.social_links || {}) as SocialLinks;
       reset({
         username: profile.username || "",
         bio: profile.bio || "",
         location: profile.location || "",
         website: profile.website || "",
-        social_links: profile.social_links || {},
+        social_links: {
+          twitter: socialLinks.twitter || "",
+          linkedin: socialLinks.linkedin || "",
+          github: socialLinks.github || "",
+        },
         academic_background: profile.academic_background || "",
         professional_background: profile.professional_background || "",
         expertise_areas: profile.expertise_areas || [],
