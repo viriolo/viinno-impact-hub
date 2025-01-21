@@ -20,7 +20,6 @@ import { ProfileForm } from "@/components/profile/ProfileForm";
 import { SocialLinksForm } from "@/components/profile/SocialLinksForm";
 import { profileSchema, type ProfileFormValues, type SocialLinks } from "@/types/profile";
 
-// Type guard to ensure social_links matches our expected structure
 const isSocialLinks = (value: unknown): value is SocialLinks => {
   if (typeof value !== 'object' || value === null) return false;
   const socialLinks = value as Record<string, unknown>;
@@ -46,12 +45,14 @@ const ProfilePage = () => {
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
-      console.log("Fetching profile for user:", user?.id);
+      if (!user?.id) throw new Error("No user ID");
+      console.log("Fetching profile for user:", user.id);
+      
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", user?.id)
-        .maybeSingle();
+        .eq("id", user.id)
+        .single();
 
       if (error) {
         console.error("Error fetching profile:", error);
@@ -62,6 +63,8 @@ const ProfilePage = () => {
       return data;
     },
     enabled: !!user?.id,
+    retry: 1,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const {
@@ -80,7 +83,6 @@ const ProfilePage = () => {
     },
   });
 
-  // Reset form when profile data is loaded
   useEffect(() => {
     if (profile) {
       reset({
@@ -95,11 +97,13 @@ const ProfilePage = () => {
 
   const updateProfile = useMutation({
     mutationFn: async (values: ProfileFormValues) => {
+      if (!user?.id) throw new Error("No user ID");
+      
       let avatarUrl = profile?.avatar_url;
 
       if (avatarFile) {
         const fileExt = avatarFile.name.split(".").pop();
-        const filePath = `${user?.id}/${Math.random()}.${fileExt}`;
+        const filePath = `${user.id}/${Math.random()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from("avatars")
@@ -121,7 +125,7 @@ const ProfilePage = () => {
           avatar_url: avatarUrl,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", user?.id);
+        .eq("id", user.id);
 
       if (error) throw error;
     },
