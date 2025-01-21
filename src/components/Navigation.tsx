@@ -4,6 +4,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { LayoutDashboard, LogOut } from "lucide-react";
+import { protectedRoutes } from "@/config/routes";
 
 export function Navigation() {
   const { user } = useAuth();
@@ -36,21 +37,21 @@ export function Navigation() {
           <div className="flex items-center space-x-6">
             {user ? (
               <>
-                <Button variant="ghost" asChild className="hover:bg-primary/5">
-                  <Link to="/dashboard" className="flex items-center gap-2">
-                    <LayoutDashboard className="h-4 w-4" />
-                    Dashboard
-                  </Link>
-                </Button>
-                <Button variant="ghost" asChild className="hover:bg-primary/5">
-                  <Link to="/about">About</Link>
-                </Button>
-                <Button variant="ghost" asChild className="hover:bg-primary/5">
-                  <Link to="/impact">Impact</Link>
-                </Button>
-                <Button variant="ghost" asChild className="hover:bg-primary/5">
-                  <Link to="/map">Map</Link>
-                </Button>
+                {protectedRoutes.map((route) => (
+                  route.path && (
+                    <Button
+                      key={route.path}
+                      variant="ghost"
+                      asChild
+                      className="hover:bg-primary/5"
+                    >
+                      <Link to={route.path} className="flex items-center gap-2">
+                        {route.path === "/dashboard" && <LayoutDashboard className="h-4 w-4" />}
+                        {route.title}
+                      </Link>
+                    </Button>
+                  )
+                ))}
                 <div className="flex items-center space-x-4 border-l pl-4">
                   <span className="text-sm text-gray-600">
                     {user.email}
