@@ -1,11 +1,26 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, Map as MapIcon, Plus, FileText } from "lucide-react";
 import { protectedRoutes } from "@/config/routes";
 
 export const Navigation = () => {
   const { user } = useAuth();
+
+  const getIconForRoute = (path: string) => {
+    switch (path) {
+      case "/dashboard":
+        return <LayoutDashboard className="h-4 w-4" />;
+      case "/map":
+        return <MapIcon className="h-4 w-4" />;
+      case "/create-impact-card":
+        return <Plus className="h-4 w-4" />;
+      case "/impact-cards":
+        return <FileText className="h-4 w-4" />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <nav className="border-b">
@@ -26,7 +41,7 @@ export const Navigation = () => {
                     className="hover:bg-primary/5"
                   >
                     <Link to={route.path} className="flex items-center gap-2">
-                      {route.path === "/dashboard" && <LayoutDashboard className="h-4 w-4" />}
+                      {getIconForRoute(route.path)}
                       {route.title}
                     </Link>
                   </Button>
