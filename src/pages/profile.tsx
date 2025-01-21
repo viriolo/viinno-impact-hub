@@ -42,6 +42,7 @@ const ProfilePage = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
+  // Fetch profile data
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
@@ -65,6 +66,27 @@ const ProfilePage = () => {
     enabled: !!user?.id,
     retry: 1,
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Fetch followers count
+  const { data: followersCount } = useQuery({
+    queryKey: ["followers", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return 0;
+      
+      const { count, error } = await supabase
+        .from("followers")
+        .select("*", { count: 'exact', head: true })
+        .eq("following_id", user.id);
+        
+      if (error) {
+        console.error("Error fetching followers:", error);
+        throw error;
+      }
+      
+      return count || 0;
+    },
+    enabled: !!user?.id,
   });
 
   const {
@@ -174,6 +196,11 @@ const ProfilePage = () => {
           <CardTitle>Profile Settings</CardTitle>
           <CardDescription>
             Customize your profile information and appearance
+            {followersCount !== undefined && followersCount > 0 && (
+              <div className="mt-2 text-sm text-muted-foreground">
+                {followersCount} follower{followersCount === 1 ? '' : 's'}
+              </div>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
