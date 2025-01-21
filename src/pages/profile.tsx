@@ -20,6 +20,23 @@ import { ProfileForm } from "@/components/profile/ProfileForm";
 import { SocialLinksForm } from "@/components/profile/SocialLinksForm";
 import { profileSchema, type ProfileFormValues, type SocialLinks } from "@/types/profile";
 
+// Type guard to ensure social_links matches our expected structure
+const isSocialLinks = (value: unknown): value is SocialLinks => {
+  if (typeof value !== 'object' || value === null) return false;
+  const socialLinks = value as Record<string, unknown>;
+  return (
+    typeof socialLinks.twitter === 'string' || socialLinks.twitter === undefined &&
+    typeof socialLinks.linkedin === 'string' || socialLinks.linkedin === undefined &&
+    typeof socialLinks.github === 'string' || socialLinks.github === undefined
+  );
+};
+
+const defaultSocialLinks: SocialLinks = {
+  twitter: "",
+  linkedin: "",
+  github: "",
+};
+
 const ProfilePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -47,12 +64,6 @@ const ProfilePage = () => {
     enabled: !!user?.id,
   });
 
-  const defaultSocialLinks: SocialLinks = {
-    twitter: "",
-    linkedin: "",
-    github: "",
-  };
-
   const {
     register,
     handleSubmit,
@@ -65,7 +76,7 @@ const ProfilePage = () => {
       bio: profile?.bio || "",
       location: profile?.location || "",
       website: profile?.website || "",
-      social_links: (profile?.social_links as SocialLinks) || defaultSocialLinks,
+      social_links: isSocialLinks(profile?.social_links) ? profile.social_links : defaultSocialLinks,
     },
   });
 
@@ -77,7 +88,7 @@ const ProfilePage = () => {
         bio: profile.bio || "",
         location: profile.location || "",
         website: profile.website || "",
-        social_links: (profile.social_links as SocialLinks) || defaultSocialLinks,
+        social_links: isSocialLinks(profile.social_links) ? profile.social_links : defaultSocialLinks,
       });
     }
   }, [profile, reset]);
