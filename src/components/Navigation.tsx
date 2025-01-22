@@ -5,7 +5,7 @@ import { LayoutDashboard, Map as MapIcon, Plus, FileText } from "lucide-react";
 import { protectedRoutes } from "@/config/routes";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Enums } from "@/integrations/supabase/types";
+import { Database } from "@/integrations/supabase/types";
 
 export const Navigation = () => {
   const { user } = useAuth();
@@ -19,7 +19,7 @@ export const Navigation = () => {
         .select("role")
         .eq("user_id", user.id);
       if (error) throw error;
-      return data.map(r => r.role as Enums["app_role"]);
+      return data.map(r => r.role as Database["public"]["Enums"]["app_role"]);
     },
     enabled: !!user?.id,
   });
@@ -39,7 +39,7 @@ export const Navigation = () => {
     }
   };
 
-  const hasRequiredRole = (allowedRoles?: Enums["app_role"][]) => {
+  const hasRequiredRole = (allowedRoles?: Database["public"]["Enums"]["app_role"][]) => {
     if (!allowedRoles || !userRoles) return false;
     return userRoles.some(role => allowedRoles.includes(role));
   };

@@ -3,11 +3,11 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
-import { Enums } from "@/integrations/supabase/types";
+import { Database } from "@/integrations/supabase/types";
 
 type RoleBasedRouteProps = {
   children: React.ReactNode;
-  allowedRoles: Enums["app_role"][];
+  allowedRoles: Database["public"]["Enums"]["app_role"][];
 };
 
 export const RoleBasedRoute = ({ children, allowedRoles }: RoleBasedRouteProps) => {

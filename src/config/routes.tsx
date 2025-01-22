@@ -10,11 +10,11 @@ import ProfilePage from "@/pages/profile";
 import Dashboard from "@/pages/dashboard";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { RoleBasedRoute } from "@/components/RoleBasedRoute";
-import { Enums } from "@/integrations/supabase/types";
+import { Database } from "@/integrations/supabase/types";
 
 export type AppRoute = RouteObject & {
   requiresAuth?: boolean;
-  allowedRoles?: Enums["app_role"][];
+  allowedRoles?: Database["public"]["Enums"]["app_role"][];
   title?: string;
 };
 
