@@ -9,9 +9,12 @@ import Map from "@/components/Map";
 import ProfilePage from "@/pages/profile";
 import Dashboard from "@/pages/dashboard";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { RoleBasedRoute } from "@/components/RoleBasedRoute";
+import { Enums } from "@/integrations/supabase/types";
 
 export type AppRoute = RouteObject & {
   requiresAuth?: boolean;
+  allowedRoles?: Enums["app_role"][];
   title?: string;
 };
 
@@ -43,30 +46,35 @@ export const protectedRoutes: AppRoute[] = [
     path: "/dashboard",
     element: <Dashboard />,
     requiresAuth: true,
+    allowedRoles: ["scholar", "mentor", "csr_funder", "ngo"],
     title: "Dashboard",
   },
   {
     path: "/profile",
     element: <ProfilePage />,
     requiresAuth: true,
+    allowedRoles: ["scholar", "mentor", "csr_funder", "ngo"],
     title: "Profile",
   },
   {
     path: "/impact-cards",
     element: <ImpactCards />,
     requiresAuth: true,
+    allowedRoles: ["scholar", "mentor", "csr_funder", "ngo"],
     title: "Impact Cards",
   },
   {
     path: "/create-impact-card",
     element: <CreateImpactCard />,
     requiresAuth: true,
+    allowedRoles: ["scholar", "mentor"],
     title: "Create Impact Card",
   },
   {
     path: "/map",
     element: <Map />,
     requiresAuth: true,
+    allowedRoles: ["scholar", "mentor", "csr_funder", "ngo"],
     title: "Map",
   },
 ];
@@ -76,7 +84,15 @@ export const routes: RouteObject[] = [
   ...protectedRoutes.map(route => ({
     ...route,
     element: route.requiresAuth ? (
-      <ProtectedRoute>{route.element}</ProtectedRoute>
+      <ProtectedRoute>
+        {route.allowedRoles ? (
+          <RoleBasedRoute allowedRoles={route.allowedRoles}>
+            {route.element}
+          </RoleBasedRoute>
+        ) : (
+          route.element
+        )}
+      </ProtectedRoute>
     ) : (
       route.element
     ),
