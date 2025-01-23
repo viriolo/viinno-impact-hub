@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -100,21 +102,20 @@ const ProfilePage = () => {
         <div className="space-y-6">
           <Card>
             <CardContent className="p-6">
-              <ProfileHeader profile={profile} />
+              <ProfileHeader />
               <ProfileAvatar
-                currentAvatarUrl={profile?.avatar_url}
-                onFileSelect={setAvatarFile}
+                avatarUrl={profile?.avatar_url}
+                username={profile?.username}
+                email={user?.email}
+                onAvatarChange={setAvatarFile}
               />
-              <ProfileActions
-                onSubmit={handleSubmit((data) => updateProfile.mutate(data))}
-                isLoading={updateProfile.isPending}
-              />
+              <ProfileActions isSubmitting={updateProfile.isPending} />
             </CardContent>
           </Card>
         </div>
         <div className="space-y-6">
-          <ProfileCompletionStatus profile={profile} />
-          <UserBadges userId={user?.id} />
+          <ProfileCompletionStatus />
+          <UserBadges />
         </div>
       </div>
     </div>
