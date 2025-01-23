@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Routes } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { routes } from "@/config/routes";
 import { initializeOfflineSupport } from "@/lib/offline";
 import { initializePerformanceMonitoring } from "@/lib/performance";
@@ -18,7 +18,11 @@ function App() {
     <>
       <Routes>
         {routes.map((route) => (
-          <route.element key={route.path} />
+          <Route 
+            key={route.path} 
+            path={route.path} 
+            element={route.element} 
+          />
         ))}
       </Routes>
       <Toaster />
