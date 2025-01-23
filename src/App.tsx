@@ -1,34 +1,28 @@
-import React from "react";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, useRoutes } from "react-router-dom";
-import { AuthProvider } from "@/components/AuthProvider";
+import { useEffect } from "react";
+import { Routes } from "react-router-dom";
 import { routes } from "@/config/routes";
-import { Navigation } from "@/components/Navigation";
-
-const queryClient = new QueryClient();
-
-function AppRoutes() {
-  const element = useRoutes(routes);
-  return element;
-}
+import { initializeOfflineSupport } from "@/lib/offline";
+import { initializePerformanceMonitoring } from "@/lib/performance";
+import { Toaster } from "@/components/ui/toaster";
 
 function App() {
+  useEffect(() => {
+    // Initialize offline support
+    initializeOfflineSupport();
+    
+    // Initialize performance monitoring
+    initializePerformanceMonitoring();
+  }, []);
+
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <AuthProvider>
-            <TooltipProvider>
-              <Navigation />
-              <AppRoutes />
-              <Sonner />
-            </TooltipProvider>
-          </AuthProvider>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </React.StrictMode>
+    <>
+      <Routes>
+        {routes.map((route) => (
+          <route.element key={route.path} />
+        ))}
+      </Routes>
+      <Toaster />
+    </>
   );
 }
 
