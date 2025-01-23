@@ -3,11 +3,19 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export const AuthForm = () => {
+  const navigate = useNavigate();
+
   useEffect(() => {
     // Listen for authentication state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        toast.success('Successfully signed in!');
+        navigate('/profile');
+      }
+      
       if (event === 'USER_UPDATED' && !session) {
         toast.error("Invalid login credentials. Please check your email and password.");
       }
@@ -36,7 +44,7 @@ export const AuthForm = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
   return (
     <Auth
