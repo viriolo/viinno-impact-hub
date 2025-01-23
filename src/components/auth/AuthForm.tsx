@@ -61,6 +61,7 @@ export const AuthForm = () => {
       }}
       providers={[]}
       redirectTo={`${window.location.origin}/auth/callback`}
+      view="sign_up"
     />
   );
 };

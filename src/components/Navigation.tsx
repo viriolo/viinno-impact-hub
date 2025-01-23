@@ -116,9 +116,14 @@ export const Navigation = () => {
                 </div>
               </>
             ) : (
-              <Button asChild variant="ghost">
-                <Link to="/login">Login</Link>
-              </Button>
+              <div className="flex items-center space-x-4">
+                <Button asChild variant="ghost">
+                  <Link to="/login">Login</Link>
+                </Button>
+                <Button asChild variant="default">
+                  <Link to="/register">Sign Up</Link>
+                </Button>
+              </div>
             )}
           </div>
         </div>
