@@ -16,6 +16,12 @@ export const AuthForm = () => {
       if (event === 'SIGNED_OUT') {
         console.log('User signed out');
       }
+
+      // Handle authentication errors
+      if (event === 'USER_DELETED' || event === 'SIGNED_OUT') {
+        console.error('Authentication error:', event);
+        toast.error('Authentication failed. Please try again.');
+      }
     });
 
     // Check if there's an error in the URL (from email confirmation)
@@ -55,10 +61,6 @@ export const AuthForm = () => {
       }}
       providers={[]}
       redirectTo={`${window.location.origin}/auth/callback`}
-      onError={(error) => {
-        console.error('Auth error:', error);
-        toast.error(error.message || 'An error occurred during authentication');
-      }}
     />
   );
 };
