@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Share2, Edit } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { SearchFilters } from "@/components/impact-cards/search-filters";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
