@@ -18,8 +18,8 @@ export const AuthForm = () => {
       }
 
       // Handle authentication errors
-      if (event === 'USER_DELETED' || event === 'SIGNED_OUT') {
-        console.error('Authentication error:', event);
+      if (event === 'PASSWORD_RECOVERY' || event === 'TOKEN_REFRESHED') {
+        console.error('Authentication event:', event);
         toast.error('Authentication failed. Please try again.');
       }
     });
