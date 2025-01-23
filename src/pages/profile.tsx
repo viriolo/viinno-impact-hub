@@ -11,7 +11,9 @@ import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileTabs } from "@/components/profile/ProfileTabs";
 import { ProfileActions } from "@/components/profile/ProfileActions";
-import { profileSchema, type ProfileFormValues, type SocialLinks } from "@/types/profile";
+import { UserBadges } from "@/components/badges/UserBadges";
+import { ProfileCompletionStatus } from "@/components/profile/ProfileCompletionStatus";
+import { profileSchema, type ProfileFormValues } from "@/types/profile";
 import { Loader2 } from "lucide-react";
 
 const ProfilePage = () => {
@@ -46,16 +48,15 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (profile) {
-      const socialLinks = (profile.social_links || {}) as SocialLinks;
       reset({
         username: profile.username || "",
         bio: profile.bio || "",
         location: profile.location || "",
         website: profile.website || "",
-        social_links: {
-          twitter: socialLinks.twitter || "",
-          linkedin: socialLinks.linkedin || "",
-          github: socialLinks.github || "",
+        social_links: profile.social_links || {
+          twitter: "",
+          linkedin: "",
+          github: "",
         },
         academic_background: profile.academic_background || "",
         professional_background: profile.professional_background || "",
@@ -101,7 +102,6 @@ const ProfilePage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
       toast.success("Profile updated successfully");
-      navigate("/dashboard");
     },
     onError: (error) => {
       console.error("Error updating profile:", error);
@@ -122,22 +122,30 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="container max-w-2xl py-8">
-      <Card>
-        <ProfileHeader />
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <ProfileAvatar
-              avatarUrl={profile?.avatar_url}
-              username={profile?.username}
-              email={user?.email}
-              onAvatarChange={(file) => setAvatarFile(file)}
-            />
-            <ProfileTabs register={register} errors={errors} />
-            <ProfileActions isSubmitting={updateProfile.isPending} />
-          </form>
-        </CardContent>
-      </Card>
+    <div className="container py-8 space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-2">
+          <Card>
+            <ProfileHeader />
+            <CardContent>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <ProfileAvatar
+                  avatarUrl={profile?.avatar_url}
+                  username={profile?.username}
+                  email={user?.email}
+                  onAvatarChange={(file) => setAvatarFile(file)}
+                />
+                <ProfileTabs register={register} errors={errors} />
+                <ProfileActions isSubmitting={updateProfile.isPending} />
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="space-y-8">
+          <ProfileCompletionStatus />
+          <UserBadges />
+        </div>
+      </div>
     </div>
   );
 };
