@@ -5,9 +5,8 @@ import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { Navigation } from "@/components/Navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AuthError } from "@supabase/supabase-js";
 
 export default function LoginPage() {
   const { session } = useAuth();
@@ -74,22 +73,6 @@ export default function LoginPage() {
     return () => subscription.unsubscribe();
   }, [toast]);
 
-  const handleAuthError = (error: AuthError) => {
-    let errorMessage = "An error occurred during authentication.";
-    
-    if (error.message.includes("invalid_credentials")) {
-      errorMessage = "Invalid email or password. Please try again.";
-    } else if (error.message.includes("Email not confirmed")) {
-      errorMessage = "Please confirm your email address before signing in.";
-    }
-
-    toast({
-      variant: "destructive",
-      title: "Authentication Error",
-      description: errorMessage,
-    });
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -123,7 +106,6 @@ export default function LoginPage() {
               }}
               providers={[]}
               redirectTo={window.location.origin}
-              onError={handleAuthError}
             />
           </div>
         </div>
