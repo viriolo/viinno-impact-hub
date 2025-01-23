@@ -168,6 +168,51 @@ export type Database = {
         }
         Relationships: []
       }
+      resources: {
+        Row: {
+          category: string | null
+          content_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          type: Database["public"]["Enums"]["resource_type"]
+          updated_at: string
+          views: number | null
+        }
+        Insert: {
+          category?: string | null
+          content_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          type: Database["public"]["Enums"]["resource_type"]
+          updated_at?: string
+          views?: number | null
+        }
+        Update: {
+          category?: string | null
+          content_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["resource_type"]
+          updated_at?: string
+          views?: number | null
+        }
+        Relationships: []
+      }
       user_activities: {
         Row: {
           activity_type: string
@@ -260,6 +305,7 @@ export type Database = {
     Enums: {
       app_role: "scholar" | "mentor" | "csr_funder" | "ngo"
       card_status: "draft" | "published" | "archived"
+      resource_type: "article" | "video" | "document" | "link"
     }
     CompositeTypes: {
       [_ in never]: never
