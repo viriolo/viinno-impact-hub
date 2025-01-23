@@ -1,11 +1,21 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Map as MapIcon, Plus, FileText } from "lucide-react";
+import { 
+  LayoutDashboard, 
+  Map as MapIcon, 
+  Plus, 
+  FileText, 
+  Building2, 
+  GraduationCap,
+  Briefcase,
+  Heart
+} from "lucide-react";
 import { protectedRoutes } from "@/config/routes";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
+import { Badge } from "@/components/ui/badge";
 
 export const Navigation = () => {
   const { user } = useAuth();
@@ -34,6 +44,21 @@ export const Navigation = () => {
         return <Plus className="h-4 w-4" />;
       case "/impact-cards":
         return <FileText className="h-4 w-4" />;
+      default:
+        return null;
+    }
+  };
+
+  const getRoleIcon = (role: Database["public"]["Enums"]["app_role"]) => {
+    switch (role) {
+      case "scholar":
+        return <GraduationCap className="h-4 w-4" />;
+      case "mentor":
+        return <Building2 className="h-4 w-4" />;
+      case "csr_funder":
+        return <Briefcase className="h-4 w-4" />;
+      case "ngo":
+        return <Heart className="h-4 w-4" />;
       default:
         return null;
     }
@@ -71,9 +96,23 @@ export const Navigation = () => {
                   )
                 ))}
                 <div className="flex items-center space-x-4 border-l pl-4">
-                  <span className="text-sm text-gray-600">
-                    {user.email}
-                  </span>
+                  <div className="flex flex-col items-end">
+                    <span className="text-sm text-gray-600">
+                      {user.email}
+                    </span>
+                    <div className="flex gap-2 mt-1">
+                      {userRoles?.map((role) => (
+                        <Badge 
+                          key={role} 
+                          variant="secondary"
+                          className="flex items-center gap-1 text-xs"
+                        >
+                          {getRoleIcon(role)}
+                          {role.replace('_', ' ')}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </>
             ) : (
