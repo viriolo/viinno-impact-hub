@@ -74,6 +74,22 @@ export default function LoginPage() {
     return () => subscription.unsubscribe();
   }, [toast]);
 
+  const handleAuthError = (error: AuthError) => {
+    let errorMessage = "An error occurred during authentication.";
+    
+    if (error.message.includes("invalid_credentials")) {
+      errorMessage = "Invalid email or password. Please try again.";
+    } else if (error.message.includes("Email not confirmed")) {
+      errorMessage = "Please confirm your email address before signing in.";
+    }
+
+    toast({
+      variant: "destructive",
+      title: "Authentication Error",
+      description: errorMessage,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -107,6 +123,7 @@ export default function LoginPage() {
               }}
               providers={[]}
               redirectTo={window.location.origin}
+              onError={handleAuthError}
             />
           </div>
         </div>
