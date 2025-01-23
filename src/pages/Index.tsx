@@ -3,6 +3,7 @@ import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { ProfileCompletionStatus } from "@/components/profile/ProfileCompletionStatus";
+import { UserBadges } from "@/components/badges/UserBadges";
 import { useAuth } from "@/components/AuthProvider";
 
 export default function Index() {
@@ -19,6 +20,7 @@ export default function Index() {
             <ActivityFeed />
             <div className="space-y-8">
               <ProfileCompletionStatus />
+              <UserBadges />
             </div>
           </div>
         )}
