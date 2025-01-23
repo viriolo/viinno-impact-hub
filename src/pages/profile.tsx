@@ -5,7 +5,6 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
@@ -13,12 +12,11 @@ import { ProfileTabs } from "@/components/profile/ProfileTabs";
 import { ProfileActions } from "@/components/profile/ProfileActions";
 import { UserBadges } from "@/components/badges/UserBadges";
 import { ProfileCompletionStatus } from "@/components/profile/ProfileCompletionStatus";
-import { profileSchema, type ProfileFormValues } from "@/types/profile";
+import { profileSchema, type ProfileFormValues, type SocialLinks } from "@/types/profile";
 import { Loader2 } from "lucide-react";
 
 const ProfilePage = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
@@ -48,16 +46,18 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (profile) {
+      const socialLinks = profile.social_links as SocialLinks || {
+        twitter: "",
+        linkedin: "",
+        github: "",
+      };
+      
       reset({
         username: profile.username || "",
         bio: profile.bio || "",
         location: profile.location || "",
         website: profile.website || "",
-        social_links: profile.social_links || {
-          twitter: "",
-          linkedin: "",
-          github: "",
-        },
+        social_links: socialLinks,
         academic_background: profile.academic_background || "",
         professional_background: profile.professional_background || "",
         expertise_areas: profile.expertise_areas || [],
