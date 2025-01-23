@@ -1,32 +1,21 @@
-import { useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
-import { routes } from "@/config/routes";
-import { initializeOfflineSupport } from "@/lib/offline";
-import { initializePerformanceMonitoring } from "@/lib/performance";
-import { Toaster } from "@/components/ui/toaster";
+import { BrowserRouter as Router } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "@/components/AuthProvider";
+import { ToastProvider } from "@/components/providers/ToastProvider";
+import { Routes } from "@/config/routes";
+
+const queryClient = new QueryClient();
 
 function App() {
-  useEffect(() => {
-    // Initialize offline support
-    initializeOfflineSupport();
-    
-    // Initialize performance monitoring
-    initializePerformanceMonitoring();
-  }, []);
-
   return (
-    <>
-      <Routes>
-        {routes.map((route) => (
-          <Route 
-            key={route.path} 
-            path={route.path} 
-            element={route.element} 
-          />
-        ))}
-      </Routes>
-      <Toaster />
-    </>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <AuthProvider>
+          <ToastProvider />
+          <Routes />
+        </AuthProvider>
+      </Router>
+    </QueryClientProvider>
   );
 }
 
