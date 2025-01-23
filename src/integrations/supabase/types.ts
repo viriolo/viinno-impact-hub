@@ -188,15 +188,21 @@ export type Database = {
           availability: Json | null
           avatar_url: string | null
           bio: string | null
+          csr_focus_areas: string[] | null
           expertise_areas: string[] | null
           id: string
+          impact_metrics: Json | null
           interests: string[] | null
           location: string | null
+          mentor_availability: Json | null
+          mentor_expertise: string[] | null
+          ngo_expertise_areas: string[] | null
           organization_description: string | null
           organization_name: string | null
           organization_type: string | null
           professional_background: string | null
           profile_completion_status: Json | null
+          project_collaborations: Json | null
           skills: string[] | null
           social_links: Json | null
           updated_at: string | null
@@ -208,15 +214,21 @@ export type Database = {
           availability?: Json | null
           avatar_url?: string | null
           bio?: string | null
+          csr_focus_areas?: string[] | null
           expertise_areas?: string[] | null
           id: string
+          impact_metrics?: Json | null
           interests?: string[] | null
           location?: string | null
+          mentor_availability?: Json | null
+          mentor_expertise?: string[] | null
+          ngo_expertise_areas?: string[] | null
           organization_description?: string | null
           organization_name?: string | null
           organization_type?: string | null
           professional_background?: string | null
           profile_completion_status?: Json | null
+          project_collaborations?: Json | null
           skills?: string[] | null
           social_links?: Json | null
           updated_at?: string | null
@@ -228,15 +240,21 @@ export type Database = {
           availability?: Json | null
           avatar_url?: string | null
           bio?: string | null
+          csr_focus_areas?: string[] | null
           expertise_areas?: string[] | null
           id?: string
+          impact_metrics?: Json | null
           interests?: string[] | null
           location?: string | null
+          mentor_availability?: Json | null
+          mentor_expertise?: string[] | null
+          ngo_expertise_areas?: string[] | null
           organization_description?: string | null
           organization_name?: string | null
           organization_type?: string | null
           professional_background?: string | null
           profile_completion_status?: Json | null
+          project_collaborations?: Json | null
           skills?: string[] | null
           social_links?: Json | null
           updated_at?: string | null

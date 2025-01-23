@@ -9,17 +9,29 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Navigation } from "@/components/Navigation";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
+  role: z.enum(["scholar", "mentor", "csr_funder", "ngo"], {
+    required_error: "Please select a role",
+  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -27,8 +39,17 @@ const registerSchema = z.object({
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
+const roleDescriptions = {
+  scholar: "Students and researchers seeking mentorship and opportunities",
+  mentor: "Experienced professionals offering guidance and support",
+  csr_funder: "Corporate Social Responsibility representatives and funders",
+  ngo: "Non-Governmental Organization representatives",
+};
+
 export default function RegisterPage() {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -36,22 +57,39 @@ export default function RegisterPage() {
       email: "",
       password: "",
       confirmPassword: "",
+      role: undefined,
     },
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
     try {
-      // TODO: Implement actual registration logic
-      console.log("Registration data:", data);
+      // Register the user
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            username: data.name,
+          },
+        },
+      });
+
+      if (signUpError) throw signUpError;
+
+      // The role will be automatically assigned through the handle_new_user trigger
+      
       toast({
         title: "Registration Successful",
-        description: "Welcome to our platform!",
+        description: "Welcome to our platform! Please check your email to verify your account.",
       });
+      
+      navigate("/login");
     } catch (error) {
+      console.error("Registration error:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Registration failed. Please try again.",
+        description: error.message || "Registration failed. Please try again.",
       });
     }
   };
@@ -100,6 +138,37 @@ export default function RegisterPage() {
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.entries(roleDescriptions).map(([role, description]) => (
+                          <SelectItem key={role} value={role}>
+                            <div className="flex flex-col">
+                              <span className="font-medium capitalize">{role.replace('_', ' ')}</span>
+                              <span className="text-xs text-muted-foreground">{description}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Choose the role that best describes your participation in the platform
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
