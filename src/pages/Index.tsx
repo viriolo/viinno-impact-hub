@@ -2,6 +2,7 @@ import { Navigation } from "@/components/Navigation";
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { ActivityFeed } from "@/components/ActivityFeed";
+import { ProfileCompletionStatus } from "@/components/profile/ProfileCompletionStatus";
 import { useAuth } from "@/components/AuthProvider";
 
 export default function Index() {
@@ -14,8 +15,11 @@ export default function Index() {
         <Hero />
         <Features />
         {user && (
-          <div className="container mx-auto px-4 py-8">
+          <div className="container mx-auto px-4 py-8 grid gap-8 md:grid-cols-2">
             <ActivityFeed />
+            <div className="space-y-8">
+              <ProfileCompletionStatus />
+            </div>
           </div>
         )}
       </main>

@@ -119,6 +119,7 @@ export type Database = {
           organization_name: string | null
           organization_type: string | null
           professional_background: string | null
+          profile_completion_status: Json | null
           skills: string[] | null
           social_links: Json | null
           updated_at: string | null
@@ -138,6 +139,7 @@ export type Database = {
           organization_name?: string | null
           organization_type?: string | null
           professional_background?: string | null
+          profile_completion_status?: Json | null
           skills?: string[] | null
           social_links?: Json | null
           updated_at?: string | null
@@ -157,6 +159,7 @@ export type Database = {
           organization_name?: string | null
           organization_type?: string | null
           professional_background?: string | null
+          profile_completion_status?: Json | null
           skills?: string[] | null
           social_links?: Json | null
           updated_at?: string | null
@@ -241,6 +244,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_profile_completion: {
+        Args: {
+          profile_data: unknown
+        }
+        Returns: number
+      }
       is_admin: {
         Args: {
           user_id: string
