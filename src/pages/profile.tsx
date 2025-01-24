@@ -13,6 +13,7 @@ import { UserBadges } from "@/components/badges/UserBadges";
 import { ProfileCompletionStatus } from "@/components/profile/ProfileCompletionStatus";
 import { profileSchema, type ProfileFormValues, type SocialLinks } from "@/types/profile";
 import { Loader2 } from "lucide-react";
+import { ProfileTabs } from "@/components/profile/ProfileTabs";
 
 const ProfilePage = () => {
   const { user } = useAuth();
@@ -71,10 +72,36 @@ const ProfilePage = () => {
 
   const updateProfile = useMutation({
     mutationFn: async (data: ProfileFormValues) => {
+      if (!user?.id) throw new Error("No user ID found");
+
+      // Handle avatar upload if a new file was selected
+      let avatarUrl = profile?.avatar_url;
+      if (avatarFile) {
+        const fileExt = avatarFile.name.split('.').pop();
+        const filePath = `${user.id}-${Math.random()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, avatarFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+
+        avatarUrl = publicUrl;
+      }
+
+      // Update profile data
       const { error } = await supabase
         .from("profiles")
-        .update(data)
-        .eq("id", user?.id);
+        .update({
+          ...data,
+          avatar_url: avatarUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user.id);
 
       if (error) throw error;
     },
@@ -86,6 +113,10 @@ const ProfilePage = () => {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile");
     },
+  });
+
+  const onSubmit = handleSubmit((data) => {
+    updateProfile.mutate(data);
   });
 
   if (isLoading) {
@@ -103,13 +134,18 @@ const ProfilePage = () => {
           <Card>
             <CardContent className="p-6">
               <ProfileHeader />
-              <ProfileAvatar
-                avatarUrl={profile?.avatar_url}
-                username={profile?.username}
-                email={user?.email}
-                onAvatarChange={setAvatarFile}
-              />
-              <ProfileActions isSubmitting={updateProfile.isPending} />
+              <form onSubmit={onSubmit} className="space-y-6">
+                <ProfileAvatar
+                  avatarUrl={profile?.avatar_url}
+                  username={profile?.username}
+                  email={user?.email}
+                  onAvatarChange={setAvatarFile}
+                />
+                <ProfileTabs register={register} errors={errors} />
+                <ProfileActions 
+                  isSubmitting={updateProfile.isPending} 
+                />
+              </form>
             </CardContent>
           </Card>
         </div>
