@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 
 export interface ProfileActionsProps {
   isSubmitting: boolean;
@@ -14,8 +14,12 @@ export const ProfileActions = ({ isSubmitting, onSubmit }: ProfileActionsProps) 
       disabled={isSubmitting}
       onClick={onSubmit}
     >
-      {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      Save Changes
+      {isSubmitting ? (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      ) : (
+        <Save className="mr-2 h-4 w-4" />
+      )}
+      {isSubmitting ? "Saving..." : "Save Changes"}
     </Button>
   );
 };
