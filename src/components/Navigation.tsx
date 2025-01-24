@@ -9,7 +9,8 @@ import {
   Building2, 
   GraduationCap,
   Briefcase,
-  Heart
+  Heart,
+  User
 } from "lucide-react";
 import { protectedRoutes } from "@/config/routes";
 import { useQuery } from "@tanstack/react-query";
@@ -96,6 +97,16 @@ export const Navigation = () => {
                   )
                 ))}
                 <div className="flex items-center space-x-4 border-l pl-4">
+                  <Button
+                    variant="ghost"
+                    asChild
+                    className="hover:bg-primary/5"
+                  >
+                    <Link to="/profile" className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Profile
+                    </Link>
+                  </Button>
                   <div className="flex flex-col items-end">
                     <span className="text-sm text-gray-600">
                       {user.email}
