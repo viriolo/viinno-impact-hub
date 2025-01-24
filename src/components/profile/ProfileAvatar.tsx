@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload } from "lucide-react";
 
-interface ProfileAvatarProps {
+export interface ProfileAvatarProps {
   avatarUrl?: string | null;
   username?: string;
   email?: string;

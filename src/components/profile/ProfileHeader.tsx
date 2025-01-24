@@ -1,12 +1,18 @@
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
-export const ProfileHeader = () => {
+interface ProfileHeaderProps {
+  title?: string;
+  description?: string;
+}
+
+export const ProfileHeader = ({ 
+  title = "Profile Settings",
+  description = "Customize your profile information and appearance"
+}: ProfileHeaderProps) => {
   return (
     <CardHeader>
-      <CardTitle>Profile Settings</CardTitle>
-      <CardDescription>
-        Customize your profile information and appearance
-      </CardDescription>
+      <CardTitle>{title}</CardTitle>
+      <CardDescription>{description}</CardDescription>
     </CardHeader>
   );
 };
