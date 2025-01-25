@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, UserRound } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { ProfileFormValues, SocialLinks } from "@/types/profile";
+import { UserBadges } from "@/components/badges/UserBadges";
+import { ImpactCardsList } from "@/components/profile/ImpactCardsList";
 
 export function ProfilePage() {
   const { user } = useAuth();
@@ -78,13 +80,23 @@ export function ProfilePage() {
             username={profile?.username}
             avatarUrl={profile?.avatar_url}
             location={profile?.location}
-            impactPoints={1220}
+            impactPoints={1200}
             isEditable={true}
             isVerified={true}
             role={primaryRole}
             socialLinks={socialLinks}
+            bio={profile?.bio}
           />
         </Card>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="md:col-span-2">
+            <ImpactCardsList userId={user?.id} />
+          </div>
+          <div>
+            <UserBadges />
+          </div>
+        </div>
 
         <ProfileTabs
           register={register}
