@@ -6,6 +6,7 @@ import { useState } from "react";
 import { SearchInput } from "./activity/SearchInput";
 import { ActivityList } from "./activity/ActivityList";
 import { PaginationControls } from "./activity/PaginationControls";
+import { toast } from "sonner";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -24,21 +25,31 @@ export function ActivityFeed() {
   const { data: activities, isLoading, error } = useQuery({
     queryKey: ["activities", user?.id, searchTerm],
     queryFn: async () => {
-      let query = supabase
-        .from("user_activities")
-        .select("*")
-        .order("created_at", { ascending: false });
+      try {
+        let query = supabase
+          .from("user_activities")
+          .select("*")
+          .order("created_at", { ascending: false });
 
-      if (searchTerm) {
-        query = query.or(`metadata->title.ilike.%${searchTerm}%,activity_type.ilike.%${searchTerm}%`);
+        if (searchTerm) {
+          query = query.or(`metadata->title.ilike.%${searchTerm}%,activity_type.ilike.%${searchTerm}%`);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+          toast.error("Failed to load activities");
+          throw error;
+        }
+        
+        return data as ActivityItem[];
+      } catch (error) {
+        console.error("Error fetching activities:", error);
+        throw error;
       }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      return data as ActivityItem[];
     },
     enabled: !!user,
+    placeholderData: [],
   });
 
   const filteredActivities = activities || [];

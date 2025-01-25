@@ -6,33 +6,54 @@ import { Award } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 export function UserBadges() {
   const { user } = useAuth();
 
-  const { data: badges, isLoading } = useQuery({
+  const { data: badges, isLoading, error } = useQuery({
     queryKey: ["user-badges", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_badges")
-        .select(`
-          badge_id,
-          awarded_at,
-          badges (
-            name,
-            description,
-            icon_url
-          )
-        `)
-        .eq("user_id", user?.id);
+      try {
+        const { data, error } = await supabase
+          .from("user_badges")
+          .select(`
+            badge_id,
+            awarded_at,
+            badges (
+              name,
+              description,
+              icon_url
+            )
+          `)
+          .eq("user_id", user?.id);
 
-      if (error) throw error;
-      return data;
+        if (error) {
+          toast.error("Failed to load badges");
+          throw error;
+        }
+        
+        return data;
+      } catch (error) {
+        console.error("Error fetching badges:", error);
+        throw error;
+      }
     },
     enabled: !!user,
+    placeholderData: [],
   });
 
   if (!user) return null;
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-4">
+          <p className="text-sm text-destructive">Failed to load badges</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
