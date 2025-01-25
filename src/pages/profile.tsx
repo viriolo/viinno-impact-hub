@@ -50,7 +50,7 @@ export function ProfilePage() {
   // Effect to handle scrolling to settings tab when section=edit
   useEffect(() => {
     if (section === 'edit') {
-      const tabsElement = document.querySelector('[data-value="settings"]');
+      const tabsElement = document.querySelector('[data-value="settings"]') as HTMLButtonElement | null;
       if (tabsElement) {
         tabsElement.click();
         tabsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
