@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { Loader2, UserRound } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export const ProfilePage = () => {
+export function ProfilePage() {
   const { user } = useAuth();
 
   const { data: profile, error, isLoading } = useQuery({
@@ -180,4 +180,4 @@ export const ProfilePage = () => {
       </div>
     </>
   );
-};
+}
