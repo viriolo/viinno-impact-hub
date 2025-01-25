@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload, Camera, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { sanitizeFileName } from "@/utils/security";
 
 export interface ProfileAvatarProps {
   avatarUrl?: string | null;
@@ -27,16 +28,18 @@ export const ProfileAvatar = ({
     return new Promise((resolve) => {
       setIsValidating(true);
       
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please upload an image file');
+      // Validate file type (whitelist approach)
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Please upload a valid image file (JPEG, PNG, GIF, or WebP)');
         setIsValidating(false);
         resolve(false);
         return;
       }
 
       // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
         toast.error('Image size should be less than 5MB');
         setIsValidating(false);
         resolve(false);
@@ -49,6 +52,13 @@ export const ProfileAvatar = ({
       
       img.onload = () => {
         URL.revokeObjectURL(objectUrl);
+        const maxDimension = 4096; // Prevent unreasonably large images
+        if (img.width > maxDimension || img.height > maxDimension) {
+          toast.error(`Image dimensions should not exceed ${maxDimension}x${maxDimension} pixels`);
+          setIsValidating(false);
+          resolve(false);
+          return;
+        }
         if (img.width < 100 || img.height < 100) {
           toast.error('Image dimensions should be at least 100x100 pixels');
           setIsValidating(false);
@@ -61,7 +71,7 @@ export const ProfileAvatar = ({
 
       img.onerror = () => {
         URL.revokeObjectURL(objectUrl);
-        toast.error('Invalid image file');
+        toast.error('Invalid or corrupted image file');
         setIsValidating(false);
         resolve(false);
       };
@@ -74,15 +84,21 @@ export const ProfileAvatar = ({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const isValid = await validateFile(file);
+    // Sanitize filename
+    const sanitizedFile = new File([file], sanitizeFileName(file.name), {
+      type: file.type,
+      lastModified: file.lastModified,
+    });
+
+    const isValid = await validateFile(sanitizedFile);
     if (!isValid) return;
 
-    onAvatarChange(file);
+    onAvatarChange(sanitizedFile);
     const reader = new FileReader();
     reader.onloadend = () => {
       setAvatarPreview(reader.result as string);
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(sanitizedFile);
   };
 
   return (
@@ -109,7 +125,7 @@ export const ProfileAvatar = ({
       </div>
       <Input
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/gif,image/webp"
         onChange={handleAvatarChange}
         className="hidden"
         id="avatar-upload"

@@ -9,11 +9,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { PersonalInfoFields } from "./form/PersonalInfoFields";
 import { PasswordFields } from "./form/PasswordFields";
 import { RoleField } from "./form/RoleField";
+import { sanitizeInput } from "@/utils/security";
 
 const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  name: z.string()
+    .min(2, "Name must be at least 2 characters")
+    .transform(val => sanitizeInput(val)),
+  email: z.string()
+    .email("Please enter a valid email address")
+    .transform(val => sanitizeInput(val.toLowerCase())),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one uppercase letter, one lowercase letter, and one number"),
   confirmPassword: z.string(),
   role: z.enum(["scholar", "mentor", "csr_funder", "ngo"], {
     required_error: "Please select a role",
