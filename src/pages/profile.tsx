@@ -64,12 +64,11 @@ export function ProfilePage() {
 
   const primaryRole = userRoles?.[0] || "scholar";
   
-  // Parse social links from JSON to expected format
-  const socialLinks: SocialLinks | undefined = profile?.social_links ? {
+  const socialLinks: SocialLinks = profile?.social_links ? {
     twitter: (profile.social_links as Record<string, string>).twitter,
     linkedin: (profile.social_links as Record<string, string>).linkedin,
     github: (profile.social_links as Record<string, string>).github
-  } : undefined;
+  } : {};
 
   return (
     <>
