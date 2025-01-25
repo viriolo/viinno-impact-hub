@@ -107,13 +107,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           toast.success("Profile updated successfully");
           break;
 
-        case 'USER_DELETED':
-          setSession(null);
-          setUser(null);
-          toast.info("Account deleted successfully");
-          handleAuthRedirect(null);
-          break;
-
         case 'PASSWORD_RECOVERY':
           toast.info("Password recovery email sent");
           break;
