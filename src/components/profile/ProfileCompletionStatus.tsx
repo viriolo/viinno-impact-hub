@@ -4,9 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const ProfileCompletionStatus = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
@@ -64,8 +66,15 @@ export const ProfileCompletionStatus = () => {
 
   const completionPercentage = calculateCompletionPercentage();
 
+  const handleClick = () => {
+    navigate("/profile");
+  };
+
   return (
-    <Card>
+    <Card 
+      className="cursor-pointer hover:shadow-md transition-shadow duration-200"
+      onClick={handleClick}
+    >
       <CardHeader>
         <CardTitle>Profile Completion</CardTitle>
       </CardHeader>
