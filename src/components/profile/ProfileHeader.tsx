@@ -11,6 +11,7 @@ interface ProfileHeaderProps {
   location?: string;
   impactPoints?: number;
   isEditable?: boolean;
+  isLoading?: boolean;
 }
 
 export const ProfileHeader = ({ 
@@ -18,7 +19,8 @@ export const ProfileHeader = ({
   username = "User",
   location = "Location not set",
   impactPoints = 0,
-  isEditable = false
+  isEditable = false,
+  isLoading = false
 }: ProfileHeaderProps) => {
   return (
     <div className="flex flex-col md:flex-row items-start gap-6 p-6 border-b">
@@ -39,7 +41,9 @@ export const ProfileHeader = ({
             </div>
           </div>
           {isEditable && (
-            <Button variant="outline">Edit Profile</Button>
+            <Button variant="outline" disabled={isLoading}>
+              {isLoading ? "Loading..." : "Edit Profile"}
+            </Button>
           )}
         </div>
         
