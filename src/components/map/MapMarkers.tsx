@@ -7,7 +7,7 @@ interface MapMarkersProps {
   impactCards: ImpactCard[];
 }
 
-export const MapMarkers = ({ map, impactCards }: MapMarkersProps) => {
+const MapMarkers = ({ map, impactCards }: MapMarkersProps) => {
   const [markers, setMarkers] = useState<mapboxgl.Marker[]>([]);
 
   useEffect(() => {
@@ -41,3 +41,5 @@ export const MapMarkers = ({ map, impactCards }: MapMarkersProps) => {
 
   return null;
 };
+
+export default MapMarkers;

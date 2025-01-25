@@ -21,7 +21,7 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
-      cacheTime: 1000 * 60 * 30, // 30 minutes cache
+      gcTime: 1000 * 60 * 30, // 30 minutes cache (renamed from cacheTime)
     },
   },
 });

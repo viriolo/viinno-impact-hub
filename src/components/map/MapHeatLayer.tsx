@@ -8,7 +8,7 @@ interface MapHeatLayerProps {
   visible: boolean;
 }
 
-export const MapHeatLayer = ({ map, impactCards, visible }: MapHeatLayerProps) => {
+const MapHeatLayer = ({ map, impactCards, visible }: MapHeatLayerProps) => {
   useEffect(() => {
     if (!map?.getSource('impact-cards')) return;
 
@@ -38,3 +38,5 @@ export const MapHeatLayer = ({ map, impactCards, visible }: MapHeatLayerProps) =
 
   return null;
 };
+
+export default MapHeatLayer;

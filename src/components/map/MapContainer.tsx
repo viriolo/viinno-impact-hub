@@ -7,7 +7,7 @@ interface MapContainerProps {
   onMapLoad: (map: mapboxgl.Map) => void;
 }
 
-export const MapContainer = ({ onMapLoad }: MapContainerProps) => {
+const MapContainer = ({ onMapLoad }: MapContainerProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
 
@@ -127,3 +127,5 @@ export const MapContainer = ({ onMapLoad }: MapContainerProps) => {
     <div ref={mapContainer} className="absolute inset-0 rounded-lg shadow-lg" />
   );
 };
+
+export default MapContainer;

@@ -3,7 +3,7 @@ interface MapControlsProps {
   onToggleHeatmap: () => void;
 }
 
-export const MapControls = ({ showHeatmap, onToggleHeatmap }: MapControlsProps) => {
+const MapControls = ({ showHeatmap, onToggleHeatmap }: MapControlsProps) => {
   return (
     <button
       onClick={onToggleHeatmap}
@@ -13,3 +13,5 @@ export const MapControls = ({ showHeatmap, onToggleHeatmap }: MapControlsProps) 
     </button>
   );
 };
+
+export default MapControls;
