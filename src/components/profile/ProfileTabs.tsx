@@ -10,16 +10,17 @@ interface ProfileTabsProps {
   register: UseFormRegister<ProfileFormValues>;
   errors: FieldErrors<ProfileFormValues>;
   role?: string;
+  defaultTab?: string;
 }
 
-export const ProfileTabs = ({ register, errors, role = "scholar" }: ProfileTabsProps) => {
+export const ProfileTabs = ({ register, errors, role = "scholar", defaultTab = "overview" }: ProfileTabsProps) => {
   return (
-    <Tabs defaultValue="overview" className="w-full">
+    <Tabs defaultValue={defaultTab} className="w-full">
       <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="projects">Projects</TabsTrigger>
         <TabsTrigger value="activity">Activity</TabsTrigger>
-        <TabsTrigger value="settings">Settings</TabsTrigger>
+        <TabsTrigger value="settings" data-value="settings">Settings</TabsTrigger>
       </TabsList>
       
       <TabsContent value="overview">

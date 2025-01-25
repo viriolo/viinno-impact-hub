@@ -10,10 +10,14 @@ import { useForm } from "react-hook-form";
 import { ProfileFormValues, SocialLinks } from "@/types/profile";
 import { UserBadges } from "@/components/badges/UserBadges";
 import { ImpactCardsList } from "@/components/profile/ImpactCardsList";
+import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 
 export function ProfilePage() {
   const { user } = useAuth();
   const { register, formState: { errors } } = useForm<ProfileFormValues>();
+  const [searchParams] = useSearchParams();
+  const section = searchParams.get('section');
 
   const { data: profile, error, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
@@ -42,6 +46,17 @@ export function ProfilePage() {
     },
     enabled: !!user?.id,
   });
+
+  // Effect to handle scrolling to settings tab when section=edit
+  useEffect(() => {
+    if (section === 'edit') {
+      const tabsElement = document.querySelector('[data-value="settings"]');
+      if (tabsElement) {
+        tabsElement.click();
+        tabsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, [section]);
 
   if (isLoading) {
     return (
@@ -101,6 +116,7 @@ export function ProfilePage() {
           register={register}
           errors={errors}
           role={primaryRole}
+          defaultTab={section === 'edit' ? 'settings' : 'overview'}
         />
       </div>
     </>
