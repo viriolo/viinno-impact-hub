@@ -1,10 +1,12 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 
 interface Props {
   children: React.ReactNode;
+  fallback?: React.ReactNode;
 }
 
 interface State {
@@ -22,6 +24,11 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return { hasError: true, error };
   }
 
+  public componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("Error caught by boundary:", error, errorInfo);
+    toast.error("An unexpected error occurred");
+  }
+
   public resetError = () => {
     this.setState({ hasError: false, error: null });
     window.location.reload();
@@ -29,16 +36,29 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
+
       return (
-        <Card className="w-full max-w-md mx-auto mt-8">
-          <CardContent className="p-6">
-            <div className="text-center space-y-4">
-              <h2 className="text-lg font-semibold text-destructive">Something went wrong</h2>
-              <p className="text-sm text-muted-foreground">
-                {this.state.error?.message || "An unexpected error occurred"}
-              </p>
-              <Button onClick={this.resetError} variant="outline" className="mt-4">
-                <RefreshCw className="mr-2 h-4 w-4" />
+        <Card className="w-full max-w-md mx-auto mt-8 border-destructive/50">
+          <CardHeader className="space-y-1">
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Something went wrong
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {this.state.error?.message || "An unexpected error occurred"}
+            </p>
+            <div className="flex justify-end">
+              <Button 
+                onClick={this.resetError} 
+                variant="outline" 
+                className="gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
                 Try again
               </Button>
             </div>

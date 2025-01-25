@@ -7,6 +7,7 @@ import { useRoutes } from "react-router-dom";
 import { routes } from "@/config/routes";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Card, CardContent } from "@/components/ui/card";
 
 // Lazy load major components
 const Hero = lazy(() => import("@/components/Hero").then(module => ({ default: module.Hero })));
@@ -21,32 +22,54 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
-      gcTime: 1000 * 60 * 30, // 30 minutes cache (renamed from cacheTime)
+      gcTime: 1000 * 60 * 30, // 30 minutes cache
     },
   },
 });
 
+function FallbackError() {
+  return (
+    <Card className="m-4">
+      <CardContent className="p-4">
+        <div className="text-center text-destructive">
+          Failed to load route
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-[200px]">
+      <LoadingSpinner />
+    </div>
+  );
+}
+
 function AppRoutes() {
   const routeElements = useRoutes(routes);
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      {routeElements}
-    </Suspense>
+    <ErrorBoundary fallback={<FallbackError />}>
+      <Suspense fallback={<LoadingFallback />}>
+        {routeElements}
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <ErrorBoundary>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <Router>
           <AuthProvider>
             <ToastProvider />
             <AppRoutes />
           </AuthProvider>
-        </ErrorBoundary>
-      </Router>
-    </QueryClientProvider>
+        </Router>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
