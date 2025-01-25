@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, UserRound } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { ProfileFormValues } from "@/types/profile";
+import { ProfileFormValues, SocialLinks } from "@/types/profile";
 
 export function ProfilePage() {
   const { user } = useAuth();
@@ -63,10 +63,10 @@ export function ProfilePage() {
   const primaryRole = userRoles?.[0] || "scholar";
   
   // Parse social links from JSON to expected format
-  const socialLinks = profile?.social_links ? {
-    twitter: profile.social_links.twitter as string | undefined,
-    linkedin: profile.social_links.linkedin as string | undefined,
-    github: profile.social_links.github as string | undefined
+  const socialLinks: SocialLinks | undefined = profile?.social_links ? {
+    twitter: (profile.social_links as Record<string, string>).twitter,
+    linkedin: (profile.social_links as Record<string, string>).linkedin,
+    github: (profile.social_links as Record<string, string>).github
   } : undefined;
 
   return (
