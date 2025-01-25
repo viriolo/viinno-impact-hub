@@ -50,6 +50,16 @@
   }
 }
 
+@layer components {
+  .section-padding {
+    @apply py-8 px-4 sm:py-12 sm:px-6 lg:py-16 lg:px-8;
+  }
+  
+  .container-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+}
+
 .hero-gradient {
   background: linear-gradient(135deg, #1a365d 0%, #2c7a7b 100%);
 }
@@ -82,4 +92,13 @@
 .gradient-animate {
   background-size: 200% 200%;
   animation: gradient 15s ease infinite;
+}
+
+/* Loading animation utilities */
+.loading-shimmer {
+  @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent;
+}
+
+.loading-pulse {
+  @apply animate-pulse bg-gray-200 dark:bg-gray-700;
 }
