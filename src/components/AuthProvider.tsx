@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -21,6 +21,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Helper function to handle redirects
+  const handleAuthRedirect = (session: Session | null) => {
+    const intendedPath = location.state?.from?.pathname;
+    if (session) {
+      navigate(intendedPath || "/profile", { replace: true });
+    } else {
+      navigate("/login", { 
+        replace: true,
+        state: { from: location }
+      });
+    }
+  };
 
   useEffect(() => {
     // Get initial session
@@ -29,13 +43,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
           console.error("Error getting session:", error);
-          toast.error("Session error. Please sign in again.");
+          toast.error("Session error: " + error.message);
           return;
         }
         
         if (session) {
           setSession(session);
           setUser(session.user);
+          // Only redirect on initial load if we're on login/register pages
+          const isAuthPage = ['/login', '/register'].includes(location.pathname);
+          if (isAuthPage) {
+            handleAuthRedirect(session);
+          }
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
@@ -53,32 +72,65 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state change:", event);
       
-      if (event === 'TOKEN_REFRESHED') {
-        if (!session) {
-          console.log("Token refresh failed");
+      switch (event) {
+        case 'SIGNED_IN':
+          setSession(session);
+          setUser(session?.user ?? null);
+          toast.success("Successfully signed in!");
+          handleAuthRedirect(session);
+          break;
+
+        case 'SIGNED_OUT':
           setSession(null);
           setUser(null);
-          toast.error("Your session has expired. Please sign in again.");
-          navigate("/login");
-          return;
-        }
-      }
+          toast.info("You have been signed out");
+          handleAuthRedirect(null);
+          break;
 
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-      
-      if (session) {
-        navigate("/profile");
-      } else if (event === 'SIGNED_OUT') {
-        navigate("/login");
+        case 'TOKEN_REFRESHED':
+          if (!session) {
+            console.error("Token refresh failed");
+            toast.error("Your session has expired. Please sign in again.");
+            setSession(null);
+            setUser(null);
+            handleAuthRedirect(null);
+          } else {
+            setSession(session);
+            setUser(session.user);
+            console.log("Token successfully refreshed");
+          }
+          break;
+
+        case 'USER_UPDATED':
+          setSession(session);
+          setUser(session?.user ?? null);
+          toast.success("Profile updated successfully");
+          break;
+
+        case 'USER_DELETED':
+          setSession(null);
+          setUser(null);
+          toast.info("Account deleted successfully");
+          handleAuthRedirect(null);
+          break;
+
+        case 'PASSWORD_RECOVERY':
+          toast.info("Password recovery email sent");
+          break;
+
+        default:
+          if (session) {
+            setSession(session);
+            setUser(session.user);
+          }
       }
+      setIsLoading(false);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, location]);
 
   if (isLoading) {
     return (
