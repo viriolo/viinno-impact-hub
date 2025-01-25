@@ -1,5 +1,10 @@
+import { Suspense, lazy } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Globe2, Users, BarChart3, Award, BookOpen, MessageSquare, Rocket, Target, Sparkles } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+
+// Lazy load feature cards in chunks
+const FeatureCard = lazy(() => import("./feature-cards/FeatureCard"));
 
 const features = [
   {
@@ -67,25 +72,14 @@ export function Features() {
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((feature, index) => (
-            <Card 
-              key={index} 
-              className="relative overflow-hidden border-none shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-            >
-              <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-50`} />
-              <CardHeader className="relative">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                  <feature.icon className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="relative">
-                <CardDescription className="text-gray-600 text-base">
-                  {feature.description}
-                </CardDescription>
-              </CardContent>
-            </Card>
-          ))}
+          <Suspense fallback={<LoadingSpinner />}>
+            {features.map((feature, index) => (
+              <FeatureCard
+                key={index}
+                feature={feature}
+              />
+            ))}
+          </Suspense>
         </div>
       </div>
     </section>

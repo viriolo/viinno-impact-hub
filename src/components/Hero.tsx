@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Globe2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 export function Hero() {
   const { toast } = useToast();
@@ -15,8 +16,19 @@ export function Hero() {
 
   return (
     <div className="hero-gradient min-h-[90vh] flex items-center justify-center text-white relative overflow-hidden">
-      <div className="absolute inset-0 bg-[url('/photo-1519389950473-47ba0277781c')] bg-cover bg-center opacity-10" />
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/50 to-primary/90" />
+      <div className="absolute inset-0">
+        <AspectRatio ratio={16 / 9} className="h-full">
+          <img
+            src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1920"
+            alt="Background"
+            className="object-cover object-center"
+            loading="lazy"
+            width={1920}
+            height={1080}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/50 to-primary/90" />
+        </AspectRatio>
+      </div>
       <div className="container mx-auto px-4 sm:px-6 py-16 relative z-10">
         <div className="max-w-3xl mx-auto text-center space-y-6">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm backdrop-blur-sm">
