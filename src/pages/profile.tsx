@@ -6,9 +6,12 @@ import { ProfileTabs } from "@/components/profile/ProfileTabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, UserRound } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { ProfileFormValues } from "@/types/profile";
 
 export function ProfilePage() {
   const { user } = useAuth();
+  const { register, formState: { errors } } = useForm<ProfileFormValues>();
 
   const { data: profile, error, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
@@ -58,6 +61,13 @@ export function ProfilePage() {
   }
 
   const primaryRole = userRoles?.[0] || "scholar";
+  
+  // Parse social links from JSON to expected format
+  const socialLinks = profile?.social_links ? {
+    twitter: profile.social_links.twitter as string | undefined,
+    linkedin: profile.social_links.linkedin as string | undefined,
+    github: profile.social_links.github as string | undefined
+  } : undefined;
 
   return (
     <>
@@ -72,13 +82,13 @@ export function ProfilePage() {
             isEditable={true}
             isVerified={true}
             role={primaryRole}
-            socialLinks={profile?.social_links}
+            socialLinks={socialLinks}
           />
         </Card>
 
         <ProfileTabs
-          register={() => ({})} // This needs to be connected to your form logic
-          errors={{}}
+          register={register}
+          errors={errors}
           role={primaryRole}
         />
       </div>
