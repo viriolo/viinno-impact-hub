@@ -3,11 +3,11 @@ import { Session, User } from "@supabase/supabase-js";
 import { useAuthState } from "@/hooks/useAuthState";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
-type AuthContextType = {
+interface AuthContextType {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
-};
+}
 
 const AuthContext = createContext<AuthContextType>({ 
   user: null, 
@@ -16,14 +16,14 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { user, session, isLoading } = useAuthState();
+  const authState = useAuthState();
 
-  if (isLoading) {
+  if (authState.isLoading) {
     return <LoadingSpinner />;
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, isLoading }}>
+    <AuthContext.Provider value={authState}>
       {children}
     </AuthContext.Provider>
   );

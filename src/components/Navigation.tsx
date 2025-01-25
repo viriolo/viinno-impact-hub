@@ -6,10 +6,8 @@ import { Database } from "@/integrations/supabase/types";
 import { NavigationLinks } from "./navigation/NavigationLinks";
 import { UserMenu } from "./navigation/UserMenu";
 import { AuthButtons } from "./navigation/AuthButtons";
-import { Menu } from "lucide-react";
-import { Button } from "./ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { MobileNavigation } from "./navigation/MobileNavigation";
 
 export const Navigation = () => {
   const { user } = useAuth();
@@ -30,9 +28,7 @@ export const Navigation = () => {
     enabled: !!user?.id,
   });
 
-  const isActiveRoute = (path: string) => {
-    return location.pathname === path;
-  };
+  const isActiveRoute = (path: string) => location.pathname === path;
 
   const navigationContent = (
     <>
@@ -55,18 +51,11 @@ export const Navigation = () => {
         </Link>
 
         {isMobile ? (
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="shrink-0">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[80vw] sm:w-[350px]">
-              <div className="flex flex-col gap-4 pt-6">
-                {navigationContent}
-              </div>
-            </SheetContent>
-          </Sheet>
+          <MobileNavigation 
+            user={!!user} 
+            userRoles={userRoles} 
+            isActiveRoute={isActiveRoute} 
+          />
         ) : (
           <div className="flex-1 flex items-center justify-between gap-4">
             {navigationContent}
