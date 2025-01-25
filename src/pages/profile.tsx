@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Loader2, UserRound, Briefcase, GraduationCap, Building2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const ProfilePage = () => {
+export const ProfilePage = () => {
   const { user } = useAuth();
 
   const { data: profile, error, isLoading } = useQuery({
@@ -191,5 +191,3 @@ const ProfilePage = () => {
     </>
   );
 };
-
-export default ProfilePage;

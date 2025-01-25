@@ -6,7 +6,7 @@ import ResetPasswordPage from "@/pages/reset-password";
 import ImpactCards from "@/pages/impact-cards";
 import CreateImpactCard from "@/pages/create-impact-card";
 import Map from "@/components/Map";
-import ProfilePage from "@/pages/profile";
+import { ProfilePage } from "@/pages/profile";
 import Dashboard from "@/pages/dashboard";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { RoleBasedRoute } from "@/components/RoleBasedRoute";
