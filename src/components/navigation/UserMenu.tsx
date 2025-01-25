@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { User } from "lucide-react";
+import { User, GraduationCap, Building2, Briefcase, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/components/AuthProvider";
