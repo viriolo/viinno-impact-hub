@@ -6,21 +6,41 @@ import { Badge } from "@/components/ui/badge";
 import { UserRound, MapPin, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Database } from "@/integrations/supabase/types";
+
+type Profile = Database["public"]["Tables"]["profiles"]["Row"] & {
+  user_role?: Database["public"]["Tables"]["user_roles"]["Row"] | null;
+};
 
 export const CommunitySection = () => {
   const { data: profiles, isLoading } = useQuery({
     queryKey: ["community-profiles"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, get profiles
+      const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
-        .select(`
-          *,
-          user_roles(role)
-        `)
+        .select()
         .limit(6);
       
-      if (error) throw error;
-      return data;
+      if (profilesError) throw profilesError;
+
+      // Then, for each profile, get their role
+      const profilesWithRoles = await Promise.all(
+        profilesData.map(async (profile) => {
+          const { data: roleData } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", profile.id)
+            .single();
+
+          return {
+            ...profile,
+            user_role: roleData
+          };
+        })
+      );
+
+      return profilesWithRoles;
     },
   });
 
@@ -63,9 +83,9 @@ export const CommunitySection = () => {
                         {profile.username || "Anonymous User"}
                       </h3>
                     </Link>
-                    {profile.user_roles?.[0]?.role && (
+                    {profile.user_role?.role && (
                       <Badge variant="secondary" className="mt-1">
-                        {profile.user_roles[0].role}
+                        {profile.user_role.role}
                       </Badge>
                     )}
                     {profile.location && (
