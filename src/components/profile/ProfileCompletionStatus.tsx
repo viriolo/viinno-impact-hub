@@ -67,8 +67,8 @@ export const ProfileCompletionStatus = () => {
   const completionPercentage = calculateCompletionPercentage();
 
   const handleClick = () => {
-    // Navigate to the profile page and scroll to the edit section
-    navigate("/profile?section=edit");
+    // Navigate to the profile page with the edit section query parameter
+    navigate("/profile?section=edit", { replace: true });
   };
 
   return (

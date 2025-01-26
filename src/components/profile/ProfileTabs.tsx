@@ -5,6 +5,8 @@ import { SocialLinksForm } from "./SocialLinksForm";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { ProfileFormValues } from "@/types/profile";
 import { Card } from "@/components/ui/card";
+import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 
 interface ProfileTabsProps {
   register: UseFormRegister<ProfileFormValues>;
@@ -14,13 +16,16 @@ interface ProfileTabsProps {
 }
 
 export const ProfileTabs = ({ register, errors, role = "scholar", defaultTab = "overview" }: ProfileTabsProps) => {
+  const [searchParams] = useSearchParams();
+  const section = searchParams.get("section");
+
   return (
-    <Tabs defaultValue={defaultTab} className="w-full">
+    <Tabs defaultValue={section || defaultTab} className="w-full">
       <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="projects">Projects</TabsTrigger>
         <TabsTrigger value="activity">Activity</TabsTrigger>
-        <TabsTrigger value="settings" data-value="settings">Settings</TabsTrigger>
+        <TabsTrigger value="edit">Settings</TabsTrigger>
       </TabsList>
       
       <TabsContent value="overview">
@@ -50,7 +55,6 @@ export const ProfileTabs = ({ register, errors, role = "scholar", defaultTab = "
                 </section>
               </>
             )}
-            {/* Add similar sections for CSR Funder and NGO roles */}
           </div>
         </Card>
       </TabsContent>
@@ -69,7 +73,7 @@ export const ProfileTabs = ({ register, errors, role = "scholar", defaultTab = "
         </Card>
       </TabsContent>
       
-      <TabsContent value="settings">
+      <TabsContent value="edit">
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Profile Settings</h3>
           <ProfileForm register={register} errors={errors} />
