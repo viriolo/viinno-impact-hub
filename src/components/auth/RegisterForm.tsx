@@ -60,16 +60,36 @@ export function RegisterForm() {
       });
 
       if (signUpError) throw signUpError;
+
+      if (signUpError?.message === "Email not confirmed") {
+        toast({
+          title: "Please verify your email",
+          description: "Check your inbox and click the verification link to complete registration.",
+        });
+        navigate("/login");
+        return;
+      }
       
       toast({
         title: "Registration Successful",
-        description: "Welcome! Let's complete your profile.",
+        description: "Please check your email to verify your account. Once verified, you can complete your profile.",
       });
       
-      // Navigate to profile page with edit section open
-      navigate("/profile?section=edit");
+      navigate("/login");
     } catch (error) {
       console.error("Registration error:", error);
+      
+      // Handle specific error cases
+      if (error.message?.includes("email_not_confirmed")) {
+        toast({
+          variant: "default",
+          title: "Email Verification Required",
+          description: "Please check your inbox and verify your email address to continue.",
+        });
+        navigate("/login");
+        return;
+      }
+
       toast({
         variant: "destructive",
         title: "Error",
