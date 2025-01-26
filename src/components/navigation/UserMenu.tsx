@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
-import { User, GraduationCap, Building2, Briefcase, Heart } from "lucide-react";
+import { User, GraduationCap, Building2, Briefcase, Heart, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/components/AuthProvider";
 import { Database } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface UserMenuProps {
   userRoles?: Database["public"]["Enums"]["app_role"][];
@@ -13,6 +16,7 @@ interface UserMenuProps {
 
 export const UserMenu = ({ userRoles, isActiveRoute }: UserMenuProps) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const getRoleIcon = (role: Database["public"]["Enums"]["app_role"]) => {
     switch (role) {
@@ -26,6 +30,18 @@ export const UserMenu = ({ userRoles, isActiveRoute }: UserMenuProps) => {
         return <Heart className="h-4 w-4" />;
       default:
         return null;
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast.success("Successfully logged out");
+      navigate("/login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      toast.error("Error logging out. Please try again.");
     }
   };
 
@@ -64,6 +80,14 @@ export const UserMenu = ({ userRoles, isActiveRoute }: UserMenuProps) => {
           ))}
         </div>
       </div>
+      <Button 
+        variant="ghost" 
+        size="icon"
+        onClick={handleLogout}
+        className="text-muted-foreground hover:text-foreground"
+      >
+        <LogOut className="h-4 w-4" />
+      </Button>
     </div>
   );
 };
