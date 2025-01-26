@@ -1,23 +1,13 @@
 import { useAuth } from "@/components/AuthProvider";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 import { SearchInput } from "./activity/SearchInput";
 import { ActivityList } from "./activity/ActivityList";
 import { PaginationControls } from "./activity/PaginationControls";
-import { toast } from "sonner";
-import { AlertTriangle } from "lucide-react";
-import { Button } from "./ui/button";
+import { ActivityError } from "./activity/ActivityError";
+import { useActivities } from "@/hooks/useActivities";
 
 const ITEMS_PER_PAGE = 5;
-
-type ActivityItem = {
-  id: string;
-  activity_type: string;
-  metadata: Record<string, any>;
-  created_at: string;
-};
 
 export function ActivityFeed() {
   const { user } = useAuth();
@@ -29,80 +19,17 @@ export function ActivityFeed() {
     isLoading,
     error,
     refetch
-  } = useQuery({
-    queryKey: ["activities", user?.id, searchTerm, currentPage],
-    queryFn: async () => {
-      try {
-        // First, get total count
-        let countQuery = supabase
-          .from("user_activities")
-          .select("*", { count: 'exact', head: true });
-
-        if (searchTerm) {
-          countQuery = countQuery.or(`metadata->title.ilike.%${searchTerm}%,activity_type.ilike.%${searchTerm}%`);
-        }
-
-        const { count, error: countError } = await countQuery;
-
-        if (countError) {
-          toast.error("Failed to load activities count");
-          throw countError;
-        }
-
-        // Then get paginated data
-        let query = supabase
-          .from("user_activities")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
-
-        if (searchTerm) {
-          query = query.or(`metadata->title.ilike.%${searchTerm}%,activity_type.ilike.%${searchTerm}%`);
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
-          toast.error("Failed to load activities");
-          throw error;
-        }
-
-        return {
-          activities: data as ActivityItem[],
-          totalCount: count || 0
-        };
-      } catch (error) {
-        console.error("Error fetching activities:", error);
-        throw error;
-      }
-    },
-    enabled: !!user,
-    placeholderData: { activities: [], totalCount: 0 },
+  } = useActivities({
+    userId: user?.id,
+    searchTerm,
+    currentPage,
+    itemsPerPage: ITEMS_PER_PAGE
   });
 
   const totalPages = Math.ceil((activitiesData?.totalCount || 0) / ITEMS_PER_PAGE);
 
   if (error) {
-    return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="flex flex-row items-center gap-2 text-destructive">
-          <AlertTriangle className="h-5 w-5" />
-          <h3 className="text-lg font-semibold">Error Loading Activities</h3>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {error instanceof Error ? error.message : "Failed to load activities"}
-          </p>
-          <Button 
-            variant="outline" 
-            onClick={() => refetch()}
-            className="w-full"
-          >
-            Try Again
-          </Button>
-        </CardContent>
-      </Card>
-    );
+    return <ActivityError error={error instanceof Error ? error : new Error("Failed to load activities")} onRetry={refetch} />;
   }
 
   return (
