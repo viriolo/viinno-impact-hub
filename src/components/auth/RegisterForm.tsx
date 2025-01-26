@@ -63,10 +63,11 @@ export function RegisterForm() {
       
       toast({
         title: "Registration Successful",
-        description: "Welcome to our platform! Please check your email to verify your account.",
+        description: "Welcome! Let's complete your profile.",
       });
       
-      navigate("/login");
+      // Navigate to profile page with edit section open
+      navigate("/profile?section=edit");
     } catch (error) {
       console.error("Registration error:", error);
       toast({
