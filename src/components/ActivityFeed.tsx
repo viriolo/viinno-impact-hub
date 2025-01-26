@@ -24,14 +24,37 @@ export function ActivityFeed() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: activities, isLoading, error, refetch } = useQuery({
-    queryKey: ["activities", user?.id, searchTerm],
+  const {
+    data: activitiesData,
+    isLoading,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: ["activities", user?.id, searchTerm, currentPage],
     queryFn: async () => {
       try {
+        // First, get total count
+        let countQuery = supabase
+          .from("user_activities")
+          .select("*", { count: 'exact', head: true });
+
+        if (searchTerm) {
+          countQuery = countQuery.or(`metadata->title.ilike.%${searchTerm}%,activity_type.ilike.%${searchTerm}%`);
+        }
+
+        const { count, error: countError } = await countQuery;
+
+        if (countError) {
+          toast.error("Failed to load activities count");
+          throw countError;
+        }
+
+        // Then get paginated data
         let query = supabase
           .from("user_activities")
           .select("*")
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: false })
+          .range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
 
         if (searchTerm) {
           query = query.or(`metadata->title.ilike.%${searchTerm}%,activity_type.ilike.%${searchTerm}%`);
@@ -43,23 +66,21 @@ export function ActivityFeed() {
           toast.error("Failed to load activities");
           throw error;
         }
-        
-        return data as ActivityItem[];
+
+        return {
+          activities: data as ActivityItem[],
+          totalCount: count || 0
+        };
       } catch (error) {
         console.error("Error fetching activities:", error);
         throw error;
       }
     },
     enabled: !!user,
-    placeholderData: [],
+    placeholderData: { activities: [], totalCount: 0 },
   });
 
-  const filteredActivities = activities || [];
-  const totalPages = Math.ceil(filteredActivities.length / ITEMS_PER_PAGE);
-  const paginatedActivities = filteredActivities.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const totalPages = Math.ceil((activitiesData?.totalCount || 0) / ITEMS_PER_PAGE);
 
   if (error) {
     return (
@@ -98,7 +119,7 @@ export function ActivityFeed() {
         />
 
         <ActivityList 
-          activities={paginatedActivities}
+          activities={activitiesData?.activities || []}
           isLoading={isLoading}
           searchTerm={searchTerm}
         />
