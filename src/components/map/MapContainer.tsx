@@ -1,7 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 interface MapContainerProps {
   onMapLoad: (map: mapboxgl.Map) => void;
@@ -10,20 +12,27 @@ interface MapContainerProps {
 const MapContainer = ({ onMapLoad }: MapContainerProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const initializeMap = async () => {
       if (!mapContainer.current) return;
 
       try {
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        const { data, error: tokenError } = await supabase.functions.invoke('get-mapbox-token');
         
-        if (error) {
-          console.error('Error fetching Mapbox token:', error);
+        if (tokenError) {
+          console.error('Error fetching Mapbox token:', tokenError);
+          setError('Unable to load map: Failed to fetch Mapbox token');
           return;
         }
 
         const { token } = data;
+        if (!token) {
+          setError('Unable to load map: Mapbox token is not configured');
+          return;
+        }
+
         mapboxgl.accessToken = token;
 
         map.current = new mapboxgl.Map({
@@ -113,6 +122,7 @@ const MapContainer = ({ onMapLoad }: MapContainerProps) => {
 
       } catch (error) {
         console.error('Error initializing map:', error);
+        setError('Unable to load map: An unexpected error occurred');
       }
     };
 
@@ -122,6 +132,17 @@ const MapContainer = ({ onMapLoad }: MapContainerProps) => {
       map.current?.remove();
     };
   }, [onMapLoad]);
+
+  if (error) {
+    return (
+      <div className="absolute inset-0 rounded-lg shadow-lg bg-background flex items-center justify-center">
+        <Alert variant="destructive" className="max-w-md">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div ref={mapContainer} className="absolute inset-0 rounded-lg shadow-lg" />
