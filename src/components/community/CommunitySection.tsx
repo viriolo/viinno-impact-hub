@@ -31,7 +31,7 @@ export const CommunitySection = () => {
             .from("user_roles")
             .select("role")
             .eq("user_id", profile.id)
-            .single();
+            .maybeSingle(); // Using maybeSingle instead of single to handle no results case
 
           return {
             ...profile,
