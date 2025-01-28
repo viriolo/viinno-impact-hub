@@ -1,69 +1,83 @@
-# Welcome to your Lovable project
+# Impact Platform
 
-## Project info
+A platform connecting scholars, mentors, CSR funders, and NGOs to create meaningful social impact.
 
-**URL**: https://lovable.dev/projects/d95074aa-a75c-4aed-90a2-c7c5dccc6580
+## Features
 
-## How can I edit this code?
+- **Authentication**: Secure user authentication with email verification
+- **User Roles**: Support for different user types (scholars, mentors, CSR funders, NGOs)
+- **Profile Management**: Detailed user profiles with role-specific information
+- **Impact Cards**: Share and track impact initiatives
+- **Messaging**: Direct communication between users
+- **Resource Library**: Educational and informational resources
+- **Activity Feed**: Track user activities and engagement
+- **Badge System**: Recognition for achievements and contributions
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **Frontend**: React + TypeScript
+- **UI Framework**: Tailwind CSS + shadcn/ui
+- **Backend**: Supabase
+- **Authentication**: Supabase Auth
+- **Database**: PostgreSQL (via Supabase)
+- **File Storage**: Supabase Storage
+- **Build Tool**: Vite
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d95074aa-a75c-4aed-90a2-c7c5dccc6580) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+1. Clone the repository
+```bash
+git clone <repository-url>
+cd impact-platform
+```
 
-**Use your preferred IDE**
+2. Install dependencies
+```bash
+npm install
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+3. Set up environment variables
+Create a `.env` file in the root directory:
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+4. Start the development server
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Development
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **Code Style**: The project uses TypeScript for type safety
+- **Components**: Built with shadcn/ui for consistent design
+- **State Management**: React Query for server state
+- **Routing**: React Router for navigation
+- **Form Handling**: React Hook Form for form management
 
-**Use GitHub Codespaces**
+## Database Schema
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Key tables:
+- `profiles`: User profile information
+- `impact_cards`: Impact initiatives and projects
+- `resources`: Educational resources
+- `messages`: User communications
+- `user_roles`: Role management
+- `badges`: Achievement system
 
-## What technologies are used for this project?
+## Contributing
 
-This project is built with .
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## License
 
-## How can I deploy this project?
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-Simply open [Lovable](https://lovable.dev/projects/d95074aa-a75c-4aed-90a2-c7c5dccc6580) and click on Share -> Publish.
+## Support
 
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+For support, please open an issue in the repository or contact the development team.
