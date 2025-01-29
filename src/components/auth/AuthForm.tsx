@@ -78,7 +78,8 @@ export const AuthForm = () => {
             },
             // Hide only the Supabase Auth UI sign up link
             anchor: {
-              "&[href*='/sign-up']": {
+              display: "inline-block",
+              "[href*='/sign-up']": {
                 display: "none",
               },
             },
