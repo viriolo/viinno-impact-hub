@@ -3,7 +3,13 @@ import { Building2, Target, Globe, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface NGOProfileProps {
-  profile: any; // Replace with proper type
+  profile: {
+    organization_name?: string;
+    organization_type?: string;
+    organization_description?: string;
+    ngo_expertise_areas?: string[];
+    project_collaborations?: any[];
+  };
 }
 
 export const NGOProfile = ({ profile }: NGOProfileProps) => {
@@ -71,10 +77,17 @@ export const NGOProfile = ({ profile }: NGOProfileProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {profile?.project_collaborations ? (
-            <pre className="text-sm bg-muted p-4 rounded-md overflow-auto">
-              {JSON.stringify(profile.project_collaborations, null, 2)}
-            </pre>
+          {profile?.project_collaborations?.length > 0 ? (
+            <div className="space-y-4">
+              {profile.project_collaborations.map((project: any, index: number) => (
+                <div key={index} className="p-4 bg-muted rounded-lg">
+                  <h4 className="font-medium">{project.title}</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {project.description}
+                  </p>
+                </div>
+              ))}
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground">No collaborations yet</p>
           )}
