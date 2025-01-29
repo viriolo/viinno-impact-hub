@@ -5,6 +5,7 @@ import RegisterPage from "@/pages/register";
 import ResetPasswordPage from "@/pages/reset-password";
 import ImpactCards from "@/pages/impact-cards";
 import CreateImpactCard from "@/pages/create-impact-card";
+import ImpactCardDetail from "@/pages/impact-card-detail";
 import Map from "@/components/Map";
 import { ProfilePage } from "@/pages/profile";
 import Dashboard from "@/pages/dashboard";
@@ -62,6 +63,13 @@ export const protectedRoutes: AppRoute[] = [
     requiresAuth: true,
     allowedRoles: ["scholar", "mentor", "csr_funder", "ngo"],
     title: "Impact Cards",
+  },
+  {
+    path: "/impact-cards/:id",
+    element: <ImpactCardDetail />,
+    requiresAuth: true,
+    allowedRoles: ["scholar", "mentor", "csr_funder", "ngo"],
+    title: "Impact Card Details",
   },
   {
     path: "/create-impact-card",
