@@ -21,11 +21,11 @@ import MapContainer from "@/components/map/MapContainer";
 import { ImpactCard } from "@/integrations/supabase/types/models.types";
 import mapboxgl from 'mapbox-gl';
 
-interface ExtendedImpactCard extends ImpactCard {
+type ExtendedImpactCard = ImpactCard & {
   profiles: {
-    username: string;
-    avatar_url: string;
-    professional_background: string;
+    username: string | null;
+    avatar_url: string | null;
+    professional_background: string | null;
   };
 }
 
@@ -179,14 +179,14 @@ const ImpactCardDetail = () => {
 
           <div className="flex items-center gap-4 pt-4 border-t">
             <img
-              src={impactCard.profiles.avatar_url}
-              alt={impactCard.profiles.username}
+              src={impactCard.profiles.avatar_url || "/placeholder.svg"}
+              alt={impactCard.profiles.username || "User"}
               className="w-12 h-12 rounded-full"
             />
             <div>
-              <h3 className="font-semibold">{impactCard.profiles.username}</h3>
+              <h3 className="font-semibold">{impactCard.profiles.username || "Anonymous"}</h3>
               <p className="text-sm text-muted-foreground">
-                {impactCard.profiles.professional_background}
+                {impactCard.profiles.professional_background || "No background provided"}
               </p>
             </div>
           </div>

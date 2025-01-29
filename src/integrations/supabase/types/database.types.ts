@@ -13,7 +13,15 @@ export type Database = {
         Row: ImpactCardRow
         Insert: ImpactCardInsert
         Update: ImpactCardUpdate
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "impact_cards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       profiles: {
         Row: ProfileRow
@@ -96,6 +104,7 @@ interface ProfileRow {
   id: string
   updated_at: string | null
   username: string | null
+  professional_background: string | null
 }
 
 interface ProfileInsert {
@@ -103,6 +112,7 @@ interface ProfileInsert {
   id: string
   updated_at?: string | null
   username?: string | null
+  professional_background?: string | null
 }
 
 interface ProfileUpdate {
@@ -110,4 +120,5 @@ interface ProfileUpdate {
   id?: string
   updated_at?: string | null
   username?: string | null
+  professional_background?: string | null
 }
