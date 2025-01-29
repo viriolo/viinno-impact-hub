@@ -9,7 +9,6 @@ import {
   Clock,
   MessageSquare,
   Loader2,
-  CheckCircle,
   AlertCircle,
   Video
 } from "lucide-react";
@@ -17,13 +16,13 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
-type Scholar = {
+interface Scholar {
   id: string;
   username: string | null;
   avatar_url: string | null;
 }
 
-type MentorshipRequest = {
+interface MentorshipRequest {
   id: string;
   mentor_id: string;
   scholar: Scholar;
@@ -32,7 +31,7 @@ type MentorshipRequest = {
   created_at: string;
 }
 
-type MentorshipSession = {
+interface MentorshipSession {
   id: string;
   mentor_id: string;
   scholar: Scholar;
@@ -434,3 +433,4 @@ export default function MentorDashboard() {
     </div>
   );
 }
+};
