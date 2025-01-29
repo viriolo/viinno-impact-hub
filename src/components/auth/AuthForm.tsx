@@ -76,12 +76,8 @@ export const AuthForm = () => {
               fontSize: "0.875rem",
               color: "#ef4444",
             },
-            // Hide only the Supabase Auth UI sign up link
             anchor: {
-              display: "inline-block",
-              "[href*='/sign-up']": {
-                display: "none",
-              },
+              display: "none",
             },
           },
         }}
