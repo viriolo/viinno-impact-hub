@@ -1,84 +1,142 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProfileForm } from "./ProfileForm";
-import { AdditionalProfileForm } from "./AdditionalProfileForm";
-import { SocialLinksForm } from "./SocialLinksForm";
-import { UseFormRegister, FieldErrors } from "react-hook-form";
-import { ProfileFormValues } from "@/types/profile";
+import { MentorProfile } from "./sections/MentorProfile";
+import { ScholarProfile } from "./sections/ScholarProfile";
+import { CSRFunderProfile } from "./sections/CSRFunderProfile";
+import { NGOProfile } from "./sections/NGOProfile";
 import { Card } from "@/components/ui/card";
-import { useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Mail, Globe, Building2 } from "lucide-react";
 
 interface ProfileTabsProps {
-  register: UseFormRegister<ProfileFormValues>;
-  errors: FieldErrors<ProfileFormValues>;
   role?: string;
-  defaultTab?: string;
+  profile: any; // Replace with proper type
 }
 
-export const ProfileTabs = ({ register, errors, role = "scholar", defaultTab = "overview" }: ProfileTabsProps) => {
-  const [searchParams] = useSearchParams();
-  const section = searchParams.get("section");
-
+export const ProfileTabs = ({ role, profile }: ProfileTabsProps) => {
   return (
-    <Tabs defaultValue={section || defaultTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="projects">Projects</TabsTrigger>
-        <TabsTrigger value="activity">Activity</TabsTrigger>
-        <TabsTrigger value="edit">Settings</TabsTrigger>
+    <Tabs defaultValue="about" className="w-full">
+      <TabsList className="w-full">
+        <TabsTrigger value="about">About</TabsTrigger>
+        {role === "mentor" && <TabsTrigger value="mentor">Mentor Profile</TabsTrigger>}
+        {role === "scholar" && <TabsTrigger value="scholar">Scholar Profile</TabsTrigger>}
+        {role === "csr_funder" && <TabsTrigger value="csr">CSR Profile</TabsTrigger>}
+        {role === "ngo" && <TabsTrigger value="ngo">NGO Profile</TabsTrigger>}
       </TabsList>
-      
-      <TabsContent value="overview">
-        <Card className="p-6">
-          <div className="space-y-8">
-            {role === "scholar" && (
-              <>
-                <section>
-                  <h3 className="text-lg font-semibold mb-4">Academic Background</h3>
-                  <ProfileForm register={register} errors={errors} />
-                </section>
-                <section>
-                  <h3 className="text-lg font-semibold mb-4">Skills & Endorsements</h3>
-                  <AdditionalProfileForm register={register} errors={errors} />
-                </section>
-              </>
-            )}
-            {role === "mentor" && (
-              <>
-                <section>
-                  <h3 className="text-lg font-semibold mb-4">Expertise & Availability</h3>
-                  <AdditionalProfileForm register={register} errors={errors} />
-                </section>
-                <section>
-                  <h3 className="text-lg font-semibold mb-4">Social Links</h3>
-                  <SocialLinksForm register={register} errors={errors} />
-                </section>
-              </>
-            )}
-          </div>
-        </Card>
+
+      <TabsContent value="about" className="mt-6">
+        <div className="space-y-6">
+          <Card className="p-6">
+            <div className="space-y-4">
+              <div>
+                <Label className="text-muted-foreground">Bio</Label>
+                <p className="mt-1">{profile?.bio || "No bio provided"}</p>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">Location</Label>
+                <div className="flex items-center mt-1">
+                  <MapPin className="h-4 w-4 mr-2" />
+                  <span>{profile?.location || "Location not set"}</span>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">Contact</Label>
+                <div className="flex items-center mt-1">
+                  <Mail className="h-4 w-4 mr-2" />
+                  <span>{profile?.email || "Email not provided"}</span>
+                </div>
+              </div>
+
+              {profile?.website && (
+                <div>
+                  <Label className="text-muted-foreground">Website</Label>
+                  <div className="flex items-center mt-1">
+                    <Globe className="h-4 w-4 mr-2" />
+                    <a
+                      href={profile.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      {profile.website}
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {profile?.organization_name && (
+                <div>
+                  <Label className="text-muted-foreground">Organization</Label>
+                  <div className="flex items-center mt-1">
+                    <Building2 className="h-4 w-4 mr-2" />
+                    <span>{profile.organization_name}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="space-y-4">
+              <div>
+                <Label className="text-muted-foreground">Skills</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {profile?.skills?.length > 0 ? (
+                    profile.skills.map((skill: string, index: number) => (
+                      <Badge key={index} variant="secondary">
+                        {skill}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No skills listed</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">Interests</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {profile?.interests?.length > 0 ? (
+                    profile.interests.map((interest: string, index: number) => (
+                      <Badge key={index} variant="secondary">
+                        {interest}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No interests listed</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
       </TabsContent>
-      
-      <TabsContent value="projects">
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Projects</h3>
-          <p className="text-muted-foreground">No projects yet</p>
-        </Card>
-      </TabsContent>
-      
-      <TabsContent value="activity">
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-          <p className="text-muted-foreground">No recent activity</p>
-        </Card>
-      </TabsContent>
-      
-      <TabsContent value="edit">
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Profile Settings</h3>
-          <ProfileForm register={register} errors={errors} />
-        </Card>
-      </TabsContent>
+
+      {role === "mentor" && (
+        <TabsContent value="mentor" className="mt-6">
+          <MentorProfile profile={profile} />
+        </TabsContent>
+      )}
+
+      {role === "scholar" && (
+        <TabsContent value="scholar" className="mt-6">
+          <ScholarProfile profile={profile} />
+        </TabsContent>
+      )}
+
+      {role === "csr_funder" && (
+        <TabsContent value="csr" className="mt-6">
+          <CSRFunderProfile profile={profile} />
+        </TabsContent>
+      )}
+
+      {role === "ngo" && (
+        <TabsContent value="ngo" className="mt-6">
+          <NGOProfile profile={profile} />
+        </TabsContent>
+      )}
     </Tabs>
   );
 };

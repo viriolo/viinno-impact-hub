@@ -152,6 +152,105 @@ export type Database = {
         }
         Relationships: []
       }
+      mentorship_requests: {
+        Row: {
+          created_at: string
+          id: string
+          mentor_id: string | null
+          message: string | null
+          proposed_times: Json | null
+          scholar_id: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentor_id?: string | null
+          message?: string | null
+          proposed_times?: Json | null
+          scholar_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentor_id?: string | null
+          message?: string | null
+          proposed_times?: Json | null
+          scholar_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentorship_requests_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentorship_requests_scholar_id_fkey"
+            columns: ["scholar_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentorship_sessions: {
+        Row: {
+          created_at: string
+          duration: unknown | null
+          id: string
+          mentor_id: string | null
+          notes: string | null
+          scheduled_at: string
+          scholar_id: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duration?: unknown | null
+          id?: string
+          mentor_id?: string | null
+          notes?: string | null
+          scheduled_at: string
+          scholar_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duration?: unknown | null
+          id?: string
+          mentor_id?: string | null
+          notes?: string | null
+          scheduled_at?: string
+          scholar_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentorship_sessions_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentorship_sessions_scholar_id_fkey"
+            columns: ["scholar_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -236,8 +335,15 @@ export type Database = {
           impact_metrics: Json | null
           interests: string[] | null
           location: string | null
+          mentor_achievements: Json | null
           mentor_availability: Json | null
+          mentor_education: Json | null
           mentor_expertise: string[] | null
+          mentor_languages: Json | null
+          mentor_preferences: Json | null
+          mentor_stats: Json | null
+          mentor_testimonials: Json | null
+          mentor_years_experience: number | null
           ngo_expertise_areas: string[] | null
           organization_description: string | null
           organization_name: string | null
@@ -262,8 +368,15 @@ export type Database = {
           impact_metrics?: Json | null
           interests?: string[] | null
           location?: string | null
+          mentor_achievements?: Json | null
           mentor_availability?: Json | null
+          mentor_education?: Json | null
           mentor_expertise?: string[] | null
+          mentor_languages?: Json | null
+          mentor_preferences?: Json | null
+          mentor_stats?: Json | null
+          mentor_testimonials?: Json | null
+          mentor_years_experience?: number | null
           ngo_expertise_areas?: string[] | null
           organization_description?: string | null
           organization_name?: string | null
@@ -288,8 +401,15 @@ export type Database = {
           impact_metrics?: Json | null
           interests?: string[] | null
           location?: string | null
+          mentor_achievements?: Json | null
           mentor_availability?: Json | null
+          mentor_education?: Json | null
           mentor_expertise?: string[] | null
+          mentor_languages?: Json | null
+          mentor_preferences?: Json | null
+          mentor_stats?: Json | null
+          mentor_testimonials?: Json | null
+          mentor_years_experience?: number | null
           ngo_expertise_areas?: string[] | null
           organization_description?: string | null
           organization_name?: string | null
