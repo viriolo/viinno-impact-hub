@@ -24,4 +24,4 @@ export const AuthContainer = ({ children, title, description }: AuthContainerPro
       </div>
     </div>
   );
-};
+}

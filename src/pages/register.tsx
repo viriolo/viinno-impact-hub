@@ -21,10 +21,8 @@ export default function RegisterPage() {
           <div className="text-center space-y-2">
             <p className="text-sm text-muted-foreground">
               Already have an account?{" "}
-              <Link to="/login">
-                <Button variant="link" className="p-0">
-                  Sign in
-                </Button>
+              <Link to="/login" className="text-primary hover:text-primary/80">
+                Sign in
               </Link>
             </p>
           </div>
