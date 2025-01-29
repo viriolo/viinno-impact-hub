@@ -26,7 +26,7 @@ type ExtendedImpactCard = ImpactCard & {
     username: string | null;
     avatar_url: string | null;
     professional_background: string | null;
-  };
+  } | null;
 }
 
 const ImpactCardDetail = () => {
@@ -48,9 +48,11 @@ const ImpactCardDetail = () => {
           )
         `)
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error("Impact card not found");
+      
       return data as ExtendedImpactCard;
     },
   });
@@ -179,14 +181,14 @@ const ImpactCardDetail = () => {
 
           <div className="flex items-center gap-4 pt-4 border-t">
             <img
-              src={impactCard.profiles.avatar_url || "/placeholder.svg"}
-              alt={impactCard.profiles.username || "User"}
+              src={impactCard.profiles?.avatar_url || "/placeholder.svg"}
+              alt={impactCard.profiles?.username || "User"}
               className="w-12 h-12 rounded-full"
             />
             <div>
-              <h3 className="font-semibold">{impactCard.profiles.username || "Anonymous"}</h3>
+              <h3 className="font-semibold">{impactCard.profiles?.username || "Anonymous"}</h3>
               <p className="text-sm text-muted-foreground">
-                {impactCard.profiles.professional_background || "No background provided"}
+                {impactCard.profiles?.professional_background || "No background provided"}
               </p>
             </div>
           </div>
