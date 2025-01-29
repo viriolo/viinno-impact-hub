@@ -19,6 +19,15 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import MapContainer from "@/components/map/MapContainer";
 import { ImpactCard } from "@/integrations/supabase/types/models.types";
+import mapboxgl from 'mapbox-gl';
+
+interface ExtendedImpactCard extends ImpactCard {
+  profiles: {
+    username: string;
+    avatar_url: string;
+    professional_background: string;
+  };
+}
 
 const ImpactCardDetail = () => {
   const { id } = useParams();
@@ -42,13 +51,7 @@ const ImpactCardDetail = () => {
         .single();
 
       if (error) throw error;
-      return data as ImpactCard & {
-        profiles: {
-          username: string;
-          avatar_url: string;
-          professional_background: string;
-        };
-      };
+      return data as ExtendedImpactCard;
     },
   });
 
