@@ -5,6 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { sanitizeProfileData } from "@/utils/helpers";
 
 export default function Profile() {
   const { user } = useAuth();
@@ -19,7 +20,7 @@ export default function Profile() {
         .single();
 
       if (error) throw error;
-      return data;
+      return sanitizeProfileData(data);
     },
     enabled: !!user?.id,
   });
