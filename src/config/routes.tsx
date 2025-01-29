@@ -11,6 +11,7 @@ import { ProfilePage } from "@/pages/profile";
 import Dashboard from "@/pages/dashboard";
 import OnboardingPage from "@/pages/onboarding";
 import MentorDashboard from "@/pages/mentor-dashboard";
+import CSRDashboard from "@/pages/csr-dashboard";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { RoleBasedRoute } from "@/components/RoleBasedRoute";
 import { Database } from "@/integrations/supabase/types";
@@ -45,6 +46,13 @@ export const publicRoutes: AppRoute[] = [
 ];
 
 export const protectedRoutes: AppRoute[] = [
+  {
+    path: "/csr-dashboard",
+    element: <CSRDashboard />,
+    requiresAuth: true,
+    allowedRoles: ["csr_funder"],
+    title: "CSR Dashboard",
+  },
   {
     path: "/mentor-dashboard",
     element: <MentorDashboard />,
