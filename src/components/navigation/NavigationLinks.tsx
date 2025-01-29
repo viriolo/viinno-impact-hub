@@ -39,7 +39,7 @@ export const NavigationLinks = ({ userRoles, isActiveRoute }: NavigationLinksPro
   return (
     <div className="flex items-center space-x-1">
       {protectedRoutes.map((route) => (
-        hasRequiredRole(route.allowedRoles) && (
+        route.path && hasRequiredRole(route.allowedRoles) && (
           <Button
             key={route.path}
             variant={isActiveRoute(route.path) ? "default" : "ghost"}

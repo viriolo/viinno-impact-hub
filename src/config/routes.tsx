@@ -14,10 +14,10 @@ const ProjectDiscovery = lazy(() => import("@/pages/project-discovery"));
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
-interface ProtectedRouteConfig extends RouteObject {
+type ProtectedRouteConfig = RouteObject & {
   allowedRoles?: AppRole[];
   title?: string;
-}
+};
 
 export const protectedRoutes: ProtectedRouteConfig[] = [
   {
