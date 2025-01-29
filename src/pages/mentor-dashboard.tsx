@@ -25,18 +25,20 @@ interface Scholar {
 interface MentorshipRequest {
   id: string;
   mentor_id: string;
-  scholar: Scholar;
+  scholar_id: string;
   status: string;
   message: string | null;
   created_at: string;
+  scholar: Scholar;
 }
 
 interface MentorshipSession {
   id: string;
   mentor_id: string;
-  scholar: Scholar;
+  scholar_id: string;
   scheduled_at: string;
   status: string;
+  scholar: Scholar;
 }
 
 export default function MentorDashboard() {
@@ -53,10 +55,11 @@ export default function MentorDashboard() {
         .select(`
           id,
           mentor_id,
+          scholar_id,
           status,
           message,
           created_at,
-          scholar:scholar_id (
+          scholar:profiles!mentorship_requests_scholar_id_fkey (
             id,
             username,
             avatar_url
@@ -79,10 +82,11 @@ export default function MentorDashboard() {
         .select(`
           id,
           mentor_id,
+          scholar_id,
           status,
           message,
           created_at,
-          scholar:scholar_id (
+          scholar:profiles!mentorship_requests_scholar_id_fkey (
             id,
             username,
             avatar_url
@@ -105,9 +109,10 @@ export default function MentorDashboard() {
         .select(`
           id,
           mentor_id,
+          scholar_id,
           scheduled_at,
           status,
-          scholar:scholar_id (
+          scholar:profiles!mentorship_sessions_scholar_id_fkey (
             id,
             username,
             avatar_url
@@ -432,4 +437,4 @@ export default function MentorDashboard() {
       </main>
     </div>
   );
-}
+};
