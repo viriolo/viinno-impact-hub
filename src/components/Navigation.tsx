@@ -8,13 +8,14 @@ import { UserMenu } from "./navigation/UserMenu";
 import { AuthButtons } from "./navigation/AuthButtons";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileNavigation } from "./navigation/MobileNavigation";
+import { toast } from "sonner";
 
 export const Navigation = () => {
   const { user } = useAuth();
   const location = useLocation();
   const isMobile = useIsMobile();
 
-  const { data: userRoles } = useQuery({
+  const { data: userRoles, isError } = useQuery({
     queryKey: ["userRoles", user?.id],
     queryFn: async () => {
       if (!user?.id) throw new Error("No user ID");
@@ -22,7 +23,10 @@ export const Navigation = () => {
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id);
-      if (error) throw error;
+      if (error) {
+        toast.error("Failed to load user roles");
+        throw error;
+      }
       return data.map(r => r.role as Database["public"]["Enums"]["app_role"]);
     },
     enabled: !!user?.id,
@@ -42,6 +46,10 @@ export const Navigation = () => {
       </div>
     </>
   );
+
+  if (isError) {
+    toast.error("Error loading navigation. Please refresh the page.");
+  }
 
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
