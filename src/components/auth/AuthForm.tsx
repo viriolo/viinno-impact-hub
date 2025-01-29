@@ -3,10 +3,12 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export const AuthForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isLoginPage = location.pathname === "/login";
 
   useEffect(() => {
     // Listen for authentication state changes
@@ -69,7 +71,7 @@ export const AuthForm = () => {
       }}
       providers={[]}
       redirectTo={`${window.location.origin}/auth/callback`}
-      view="sign_up"
+      view={isLoginPage ? "sign_in" : "sign_up"}
     />
   );
 };
