@@ -10,7 +10,6 @@ import { ProfileFormValues } from "@/types/profile";
 import { UserBadges } from "@/components/badges/UserBadges";
 import { ImpactCardsList } from "@/components/profile/ImpactCardsList";
 import { useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
@@ -35,19 +34,6 @@ export function ProfilePage() {
     enabled: !!user?.id,
   });
 
-  const { data: userRoles } = useQuery({
-    queryKey: ["userRoles", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user?.id);
-      if (error) throw error;
-      return data.map(r => r.role);
-    },
-    enabled: !!user?.id,
-  });
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -67,7 +53,8 @@ export function ProfilePage() {
     );
   }
 
-  const primaryRole = userRoles?.[0] || "scholar";
+  // Use a default date if created_at is not available
+  const memberSince = user?.created_at ? new Date(user.created_at).getFullYear() : new Date().getFullYear();
 
   return (
     <>
@@ -141,7 +128,7 @@ export function ProfilePage() {
         <footer className="mt-12 py-6 border-t">
           <div className="flex justify-between items-center text-sm text-gray-500">
             <div>
-              <span>Member since {new Date(profile?.created_at || Date.now()).getFullYear()}</span>
+              <span>Member since {memberSince}</span>
             </div>
             <div className="flex space-x-4">
               <a href="#" className="hover:text-gray-900">Terms</a>
