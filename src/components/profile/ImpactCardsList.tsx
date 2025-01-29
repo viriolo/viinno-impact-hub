@@ -1,12 +1,15 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 
 interface ImpactCard {
   id: string;
   title: string;
   description: string;
+  status: 'draft' | 'published' | 'archived';
 }
 
 export const ImpactCardsList = ({ userId }: { userId?: string }) => {
@@ -26,40 +29,52 @@ export const ImpactCardsList = ({ userId }: { userId?: string }) => {
     enabled: !!userId,
   });
 
+  if (isLoading) {
+    return (
+      <>
+        {[...Array(3)].map((_, i) => (
+          <Card key={i} className="h-48">
+            <CardContent className="p-4">
+              <Skeleton className="h-4 w-3/4 mb-2" />
+              <Skeleton className="h-20 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </>
+    );
+  }
+
+  if (!impactCards?.length) {
+    return (
+      <Card className="col-span-3">
+        <CardContent className="p-6 text-center text-muted-foreground">
+          <p>No impact cards created yet</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Impact Cards</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4 md:grid-cols-3">
-          {isLoading ? (
-            [...Array(3)].map((_, i) => (
-              <Card key={i}>
-                <CardContent className="p-4">
-                  <Skeleton className="h-4 w-3/4 mb-2" />
-                  <Skeleton className="h-20 w-full" />
-                </CardContent>
-              </Card>
-            ))
-          ) : impactCards && impactCards.length > 0 ? (
-            impactCards.map((card: ImpactCard) => (
-              <Card key={card.id}>
-                <CardContent className="p-4">
-                  <h3 className="font-medium mb-2">{card.title}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {card.description}
-                  </p>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <div className="col-span-3 text-center py-8 text-muted-foreground">
-              No impact cards created yet
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+    <>
+      {impactCards.map((card: ImpactCard) => (
+        <Link to={`/impact-cards/${card.id}`} key={card.id}>
+          <Card className="h-full transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
+            <CardContent className="p-6">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-lg">{card.title}</h3>
+                  <Badge variant="secondary" className="text-xs">
+                    {card.status}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground line-clamp-3">
+                  {card.description}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      ))}
+    </>
   );
 };
