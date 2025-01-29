@@ -11,7 +11,6 @@ export const AuthForm = () => {
   const isLoginPage = location.pathname === "/login";
 
   useEffect(() => {
-    // Listen for authentication state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
         toast.success('Successfully signed in!');
@@ -22,19 +21,16 @@ export const AuthForm = () => {
         toast.error("Invalid login credentials. Please check your email and password.");
       }
       
-      // Handle specific error cases
       if (event === 'SIGNED_OUT') {
         console.log('User signed out');
       }
 
-      // Handle authentication errors
       if (event === 'PASSWORD_RECOVERY' || event === 'TOKEN_REFRESHED') {
         console.error('Authentication event:', event);
         toast.error('Authentication failed. Please try again.');
       }
     });
 
-    // Check if there's an error in the URL (from email confirmation)
     const params = new URLSearchParams(window.location.search);
     const error = params.get('error');
     const error_description = params.get('error_description');
@@ -62,12 +58,30 @@ export const AuthForm = () => {
               },
             },
           },
-          className: {
-            container: "space-y-4",
-            button: "w-full px-4 py-2 bg-primary text-white rounded hover:bg-primary/90",
-            input: "w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary",
-            message: "text-sm text-red-500",
-            anchor: "hidden", // Hide the Supabase Auth UI "Sign Up" link
+          style: {
+            button: {
+              width: "100%",
+              padding: "8px 16px",
+              backgroundColor: "#1a365d",
+              color: "white",
+              borderRadius: "0.375rem",
+            },
+            input: {
+              width: "100%",
+              padding: "8px 12px",
+              border: "1px solid #e2e8f0",
+              borderRadius: "0.375rem",
+            },
+            message: {
+              fontSize: "0.875rem",
+              color: "#ef4444",
+            },
+            // Hide only the Supabase Auth UI sign up link
+            anchor: {
+              "&[href*='/sign-up']": {
+                display: "none",
+              },
+            },
           },
         }}
         providers={[]}
@@ -75,7 +89,7 @@ export const AuthForm = () => {
         view={isLoginPage ? "sign_in" : "sign_up"}
       />
       {isLoginPage && (
-        <div className="text-center space-y-2">
+        <div className="text-center">
           <p className="text-sm text-muted-foreground">
             Don't have an account?{" "}
             <Link to="/register" className="text-primary hover:text-primary/80">
