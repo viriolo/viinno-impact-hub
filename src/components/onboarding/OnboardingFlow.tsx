@@ -24,7 +24,7 @@ export function OnboardingFlow() {
         .from("onboarding_progress")
         .update({
           current_step: step,
-          completed_steps: supabase.sql`array_append(completed_steps, ${currentStep})`,
+          completed_steps: `array_append(completed_steps, '${currentStep}')`,
           ...data,
         })
         .eq("user_id", user?.id);
