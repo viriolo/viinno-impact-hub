@@ -3,7 +3,7 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 
 export const AuthForm = () => {
   const navigate = useNavigate();
@@ -49,29 +49,41 @@ export const AuthForm = () => {
   }, [navigate]);
 
   return (
-    <Auth
-      supabaseClient={supabase}
-      appearance={{
-        theme: ThemeSupa,
-        variables: {
-          default: {
-            colors: {
-              brand: "#1a365d",
-              brandAccent: "#2d73b9",
+    <div className="space-y-6">
+      <Auth
+        supabaseClient={supabase}
+        appearance={{
+          theme: ThemeSupa,
+          variables: {
+            default: {
+              colors: {
+                brand: "#1a365d",
+                brandAccent: "#2d73b9",
+              },
             },
           },
-        },
-        className: {
-          container: "space-y-4",
-          button: "w-full px-4 py-2 bg-primary text-white rounded hover:bg-primary/90",
-          input: "w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary",
-          message: "text-sm text-red-500",
-          anchor: "text-primary hover:text-primary/80",
-        },
-      }}
-      providers={[]}
-      redirectTo={`${window.location.origin}/auth/callback`}
-      view={isLoginPage ? "sign_in" : "sign_up"}
-    />
+          className: {
+            container: "space-y-4",
+            button: "w-full px-4 py-2 bg-primary text-white rounded hover:bg-primary/90",
+            input: "w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary",
+            message: "text-sm text-red-500",
+            anchor: "hidden", // Hide the Supabase Auth UI "Sign Up" link
+          },
+        }}
+        providers={[]}
+        redirectTo={`${window.location.origin}/auth/callback`}
+        view={isLoginPage ? "sign_in" : "sign_up"}
+      />
+      {isLoginPage && (
+        <div className="text-center space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Don't have an account?{" "}
+            <Link to="/register" className="text-primary hover:text-primary/80">
+              Sign up
+            </Link>
+          </p>
+        </div>
+      )}
+    </div>
   );
 };
