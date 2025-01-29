@@ -1,7 +1,7 @@
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/components/AuthProvider";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Users,
@@ -10,14 +10,41 @@ import {
   MessageSquare,
   Loader2,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Video
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+
+type Scholar = {
+  id: string;
+  username: string | null;
+  avatar_url: string | null;
+}
+
+type MentorshipRequest = {
+  id: string;
+  mentor_id: string;
+  scholar: Scholar;
+  status: string;
+  message: string | null;
+  created_at: string;
+}
+
+type MentorshipSession = {
+  id: string;
+  mentor_id: string;
+  scholar: Scholar;
+  scheduled_at: string;
+  status: string;
+}
 
 export default function MentorDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: mentorshipRequests, isLoading: isLoadingRequests } = useQuery({
     queryKey: ["mentorship-requests", user?.id],
@@ -25,7 +52,11 @@ export default function MentorDashboard() {
       const { data, error } = await supabase
         .from("mentorship_requests")
         .select(`
-          *,
+          id,
+          mentor_id,
+          status,
+          message,
+          created_at,
           scholar:scholar_id (
             id,
             username,
@@ -36,7 +67,7 @@ export default function MentorDashboard() {
         .eq("status", "pending");
 
       if (error) throw error;
-      return data;
+      return data as MentorshipRequest[];
     },
     enabled: !!user?.id,
   });
@@ -47,7 +78,11 @@ export default function MentorDashboard() {
       const { data, error } = await supabase
         .from("mentorship_requests")
         .select(`
-          *,
+          id,
+          mentor_id,
+          status,
+          message,
+          created_at,
           scholar:scholar_id (
             id,
             username,
@@ -58,7 +93,7 @@ export default function MentorDashboard() {
         .eq("status", "accepted");
 
       if (error) throw error;
-      return data;
+      return data as MentorshipRequest[];
     },
     enabled: !!user?.id,
   });
@@ -69,7 +104,10 @@ export default function MentorDashboard() {
       const { data, error } = await supabase
         .from("mentorship_sessions")
         .select(`
-          *,
+          id,
+          mentor_id,
+          scheduled_at,
+          status,
           scholar:scholar_id (
             id,
             username,
@@ -82,10 +120,83 @@ export default function MentorDashboard() {
         .order("scheduled_at", { ascending: true });
 
       if (error) throw error;
-      return data;
+      return data as MentorshipSession[];
     },
     enabled: !!user?.id,
   });
+
+  const handleRequestMutation = useMutation({
+    mutationFn: async ({ requestId, status }: { requestId: string, status: 'accepted' | 'declined' }) => {
+      const { error } = await supabase
+        .from("mentorship_requests")
+        .update({ status })
+        .eq("id", requestId);
+
+      if (error) throw error;
+
+      // If accepted, create a mentorship session
+      if (status === 'accepted') {
+        const request = mentorshipRequests?.find(r => r.id === requestId);
+        if (request) {
+          const scheduledAt = new Date();
+          scheduledAt.setDate(scheduledAt.getDate() + 7); // Schedule for a week from now
+
+          const { error: sessionError } = await supabase
+            .from("mentorship_sessions")
+            .insert({
+              mentor_id: request.mentor_id,
+              scholar_id: request.scholar.id,
+              scheduled_at: scheduledAt.toISOString(),
+              status: 'scheduled'
+            });
+
+          if (sessionError) throw sessionError;
+        }
+      }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["mentorship-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["active-mentorships"] });
+      queryClient.invalidateQueries({ queryKey: ["upcoming-sessions"] });
+      
+      toast({
+        title: `Request ${variables.status}`,
+        description: `Successfully ${variables.status} the mentorship request.`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to process the request. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleJoinSession = async (sessionId: string) => {
+    // Here you would typically:
+    // 1. Update session status to 'in-progress'
+    // 2. Create or join a video call room
+    // 3. Navigate to the session room
+    
+    try {
+      const { error } = await supabase
+        .from("mentorship_sessions")
+        .update({ status: 'in-progress' })
+        .eq("id", sessionId);
+
+      if (error) throw error;
+
+      // Navigate to video call room (implement this route and component)
+      navigate(`/mentorship/session/${sessionId}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to join the session. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -197,17 +308,23 @@ export default function MentorDashboard() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => {
-                                  // Handle decline
-                                }}
+                                onClick={() => 
+                                  handleRequestMutation.mutate({
+                                    requestId: request.id,
+                                    status: 'declined'
+                                  })
+                                }
                               >
                                 Decline
                               </Button>
                               <Button
                                 size="sm"
-                                onClick={() => {
-                                  // Handle accept
-                                }}
+                                onClick={() => 
+                                  handleRequestMutation.mutate({
+                                    requestId: request.id,
+                                    status: 'accepted'
+                                  })
+                                }
                               >
                                 Accept
                               </Button>
@@ -254,11 +371,9 @@ export default function MentorDashboard() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => {
-                                // Navigate to mentorship detail
-                              }}
+                              onClick={() => navigate(`/messages/${mentorship.scholar.id}`)}
                             >
-                              View Details
+                              Message
                             </Button>
                           </div>
                         </CardContent>
@@ -300,11 +415,9 @@ export default function MentorDashboard() {
                             </div>
                             <Button
                               size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                // Handle join session
-                              }}
+                              onClick={() => handleJoinSession(session.id)}
                             >
+                              <Video className="mr-2 h-4 w-4" />
                               Join Session
                             </Button>
                           </div>
