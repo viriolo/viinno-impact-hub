@@ -9,6 +9,7 @@ import ImpactCardDetail from "@/pages/impact-card-detail";
 import Map from "@/components/Map";
 import { ProfilePage } from "@/pages/profile";
 import Dashboard from "@/pages/dashboard";
+import OnboardingPage from "@/pages/onboarding";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { RoleBasedRoute } from "@/components/RoleBasedRoute";
 import { Database } from "@/integrations/supabase/types";
@@ -43,6 +44,12 @@ export const publicRoutes: AppRoute[] = [
 ];
 
 export const protectedRoutes: AppRoute[] = [
+  {
+    path: "/onboarding",
+    element: <OnboardingPage />,
+    requiresAuth: true,
+    title: "Onboarding",
+  },
   {
     path: "/dashboard",
     element: <Dashboard />,

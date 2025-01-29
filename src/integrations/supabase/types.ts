@@ -182,6 +182,48 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_progress: {
+        Row: {
+          completed_steps: Json | null
+          created_at: string
+          current_step: string
+          goals: Json | null
+          id: string
+          interests: string[] | null
+          is_completed: boolean | null
+          preferences: Json | null
+          selected_role: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_steps?: Json | null
+          created_at?: string
+          current_step?: string
+          goals?: Json | null
+          id?: string
+          interests?: string[] | null
+          is_completed?: boolean | null
+          preferences?: Json | null
+          selected_role?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_steps?: Json | null
+          created_at?: string
+          current_step?: string
+          goals?: Json | null
+          id?: string
+          interests?: string[] | null
+          is_completed?: boolean | null
+          preferences?: Json | null
+          selected_role?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           academic_background: string | null
