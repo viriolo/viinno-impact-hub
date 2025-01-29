@@ -10,6 +10,7 @@ import Map from "@/components/Map";
 import { ProfilePage } from "@/pages/profile";
 import Dashboard from "@/pages/dashboard";
 import OnboardingPage from "@/pages/onboarding";
+import MentorDashboard from "@/pages/mentor-dashboard";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { RoleBasedRoute } from "@/components/RoleBasedRoute";
 import { Database } from "@/integrations/supabase/types";
@@ -44,6 +45,13 @@ export const publicRoutes: AppRoute[] = [
 ];
 
 export const protectedRoutes: AppRoute[] = [
+  {
+    path: "/mentor-dashboard",
+    element: <MentorDashboard />,
+    requiresAuth: true,
+    allowedRoles: ["mentor"],
+    title: "Mentor Dashboard",
+  },
   {
     path: "/onboarding",
     element: <OnboardingPage />,
