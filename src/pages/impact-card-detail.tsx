@@ -19,14 +19,13 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import MapContainer from "@/components/map/MapContainer";
 import { ImpactCard } from "@/integrations/supabase/types/models.types";
+import type { Database } from "@/integrations/supabase/types";
 import mapboxgl from 'mapbox-gl';
 
+type ProfileType = Database['public']['Tables']['profiles']['Row'];
+
 type ExtendedImpactCard = ImpactCard & {
-  profiles: {
-    username: string | null;
-    avatar_url: string | null;
-    professional_background: string | null;
-  } | null;
+  profiles: Pick<ProfileType, 'username' | 'avatar_url' | 'professional_background'> | null;
 }
 
 const ImpactCardDetail = () => {
@@ -53,7 +52,7 @@ const ImpactCardDetail = () => {
       if (error) throw error;
       if (!data) throw new Error("Impact card not found");
       
-      return data as ExtendedImpactCard;
+      return data as unknown as ExtendedImpactCard;
     },
   });
 
