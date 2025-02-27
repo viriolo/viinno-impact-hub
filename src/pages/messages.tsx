@@ -56,8 +56,8 @@ const MessagesPage = () => {
             is_read,
             sender_id,
             recipient_id,
-            sender:sender_id(id, username, avatar_url),
-            recipient:recipient_id(id, username, avatar_url)
+            sender_profile:profiles!sender_id(id, username, avatar_url),
+            recipient_profile:profiles!recipient_id(id, username, avatar_url)
           `)
           .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
           .order("created_at", { ascending: false });
@@ -70,7 +70,7 @@ const MessagesPage = () => {
         messages.forEach((message) => {
           const isUserSender = message.sender_id === user.id;
           const otherUserId = isUserSender ? message.recipient_id : message.sender_id;
-          const otherUser = isUserSender ? message.recipient : message.sender;
+          const otherUser = isUserSender ? message.recipient_profile : message.sender_profile;
           
           if (!conversationsMap.has(otherUserId)) {
             conversationsMap.set(otherUserId, {
