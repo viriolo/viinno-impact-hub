@@ -144,7 +144,9 @@ export type Database = {
         Row: {
           category: string | null
           created_at: string
+          current_amount: number | null
           description: string | null
+          goal_amount: number | null
           id: string
           latitude: number | null
           location: string | null
@@ -161,7 +163,9 @@ export type Database = {
         Insert: {
           category?: string | null
           created_at?: string
+          current_amount?: number | null
           description?: string | null
+          goal_amount?: number | null
           id?: string
           latitude?: number | null
           location?: string | null
@@ -178,7 +182,9 @@ export type Database = {
         Update: {
           category?: string | null
           created_at?: string
+          current_amount?: number | null
           description?: string | null
+          goal_amount?: number | null
           id?: string
           latitude?: number | null
           location?: string | null
