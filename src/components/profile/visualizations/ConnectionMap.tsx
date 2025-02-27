@@ -1,9 +1,8 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Globe, Loader2 } from "lucide-react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from "@react-google-maps/api";
 
 interface Connection {
   id: string;
@@ -19,97 +18,34 @@ interface ConnectionMapProps {
   connections: Connection[];
 }
 
+const mapContainerStyle = {
+  width: "100%",
+  height: "100%",
+  borderRadius: "0.5rem"
+};
+
+const defaultCenter = {
+  lat: 20,
+  lng: 0
+};
+
 export function ConnectionMap({ connections }: ConnectionMapProps) {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const markers = useRef<mapboxgl.Marker[]>([]);
+  const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
 
-  useEffect(() => {
-    if (!mapContainer.current) return;
+  // Load Google Maps API
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: "AIzaSyBcufX9djtE5atVlr2qLvzjwXPphgh06Hc"
+  });
 
-    const initializeMap = async () => {
-      try {
-        // For security, we should use the Supabase Edge Function to get the token
-        // In a real implementation, we'd use the following:
-        // const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        // But for this demo, we'll use a temporary fallback for the map initialization:
-        
-        mapboxgl.accessToken = 'YOUR_MAPBOX_TOKEN'; // This should be replaced with a proper token
-        
-        map.current = new mapboxgl.Map({
-          container: mapContainer.current,
-          style: "mapbox://styles/mapbox/light-v11",
-          center: [0, 20], // Center on world map
-          zoom: 1.5,
-        });
+  const onLoad = useCallback((map: google.maps.Map) => {
+    setMap(map);
+  }, []);
 
-        map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
-
-        // Remove all existing markers first
-        markers.current.forEach((marker) => marker.remove());
-        markers.current = [];
-
-        // Wait for map to load before adding markers
-        map.current.on("load", () => {
-          setLoading(false);
-          
-          // Add markers for connections
-          connections.forEach((connection) => {
-            // Create custom popup content
-            const popupHTML = `
-              <div class="p-2">
-                <div class="font-semibold">${connection.name}</div>
-                <div class="text-sm text-muted-foreground">${connection.title}</div>
-                <div class="text-sm">${connection.location}</div>
-              </div>
-            `;
-
-            // Create popup
-            const popup = new mapboxgl.Popup({
-              offset: 25,
-              closeButton: false,
-            }).setHTML(popupHTML);
-
-            // Create marker element
-            const markerEl = document.createElement("div");
-            markerEl.className = "marker-element";
-            markerEl.style.backgroundColor = "#4f46e5";
-            markerEl.style.width = "12px";
-            markerEl.style.height = "12px";
-            markerEl.style.borderRadius = "50%";
-            markerEl.style.border = "2px solid white";
-            markerEl.style.boxShadow = "0 0 0 2px rgba(79, 70, 229, 0.3)";
-
-            // Add marker to map
-            const marker = new mapboxgl.Marker(markerEl)
-              .setLngLat([connection.longitude, connection.latitude])
-              .setPopup(popup)
-              .addTo(map.current!);
-
-            markers.current.push(marker);
-          });
-        });
-      } catch (err) {
-        console.error("Error initializing map:", err);
-        setError("Failed to load the map. Please try again later.");
-        setLoading(false);
-      }
-    };
-
-    initializeMap();
-
-    // Cleanup function
-    return () => {
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
-      }
-      markers.current.forEach((marker) => marker.remove());
-      markers.current = [];
-    };
-  }, [connections]);
+  const onUnmount = useCallback(() => {
+    setMap(null);
+  }, []);
 
   return (
     <Card className="shadow-sm mb-6">
@@ -124,21 +60,73 @@ export function ConnectionMap({ connections }: ConnectionMapProps) {
           <div className="flex items-center justify-center h-[300px] bg-muted/50 rounded-lg">
             <p className="text-muted-foreground">No connections to display</p>
           </div>
-        ) : error ? (
+        ) : loadError ? (
           <div className="flex items-center justify-center h-[300px] bg-muted/50 rounded-lg">
-            <p className="text-destructive">{error}</p>
+            <p className="text-destructive">Error loading maps</p>
+          </div>
+        ) : !isLoaded ? (
+          <div className="flex items-center justify-center h-[400px] bg-muted/50 rounded-lg">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
           <div className="h-[400px] rounded-lg relative">
-            {loading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10 rounded-lg">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            )}
-            <div
-              ref={mapContainer}
-              className="h-full w-full rounded-lg"
-            ></div>
+            <GoogleMap
+              mapContainerStyle={mapContainerStyle}
+              center={defaultCenter}
+              zoom={2}
+              onLoad={onLoad}
+              onUnmount={onUnmount}
+              options={{
+                zoomControl: true,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: true,
+                styles: [
+                  {
+                    featureType: "water",
+                    elementType: "geometry",
+                    stylers: [{ color: "#e9e9e9" }, { lightness: 17 }]
+                  },
+                  {
+                    featureType: "landscape",
+                    elementType: "geometry",
+                    stylers: [{ color: "#f5f5f5" }, { lightness: 20 }]
+                  }
+                ]
+              }}
+            >
+              {connections.map((connection) => (
+                <Marker
+                  key={connection.id}
+                  position={{ lat: connection.latitude, lng: connection.longitude }}
+                  onClick={() => setSelectedConnection(connection)}
+                  icon={{
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 8,
+                    fillColor: "#4f46e5",
+                    fillOpacity: 1,
+                    strokeColor: "#ffffff",
+                    strokeWeight: 2
+                  }}
+                />
+              ))}
+              
+              {selectedConnection && (
+                <InfoWindow
+                  position={{ 
+                    lat: selectedConnection.latitude, 
+                    lng: selectedConnection.longitude 
+                  }}
+                  onCloseClick={() => setSelectedConnection(null)}
+                >
+                  <div className="p-2 max-w-[200px]">
+                    <div className="font-semibold">{selectedConnection.name}</div>
+                    <div className="text-sm text-gray-600">{selectedConnection.title}</div>
+                    <div className="text-sm">{selectedConnection.location}</div>
+                  </div>
+                </InfoWindow>
+              )}
+            </GoogleMap>
           </div>
         )}
       </CardContent>
