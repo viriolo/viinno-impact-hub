@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MentorProfile } from "./sections/MentorProfile";
 import { ScholarProfile } from "./sections/ScholarProfile";
@@ -12,6 +11,9 @@ import { SkillsEndorsementsGrid } from "./sections/SkillsEndorsementsGrid";
 import { InteractiveTimeline } from "./sections/InteractiveTimeline";
 import { NetworkActivityFeed } from "./sections/NetworkActivityFeed";
 import { AchievementBadgesCarousel } from "./sections/AchievementBadgesCarousel";
+import { ImpactMetricsDashboard } from "./visualizations/ImpactMetricsDashboard";
+import { ConnectionMap } from "./visualizations/ConnectionMap";
+import { EngagementHeatmap } from "./visualizations/EngagementHeatmap";
 
 // Sample data for demonstration (replace with actual data from API)
 const sampleEndorsedSkills = [
@@ -140,6 +142,108 @@ const sampleBadges = [
   },
 ];
 
+const sampleProjectMetrics = [
+  { label: "Education", value: 12, color: "#4f46e5" },
+  { label: "Healthcare", value: 8, color: "#06b6d4" },
+  { label: "Environment", value: 15, color: "#10b981" },
+  { label: "Agriculture", value: 5, color: "#f59e0b" },
+  { label: "Infrastructure", value: 7, color: "#ef4444" },
+];
+
+const sampleFundingMetrics = [
+  { label: "Grants", value: 45000, color: "#4f46e5" },
+  { label: "Donations", value: 28000, color: "#06b6d4" },
+  { label: "Sponsorships", value: 15000, color: "#10b981" },
+  { label: "Partnerships", value: 32000, color: "#f59e0b" },
+];
+
+const sampleSdgMetrics = [
+  { label: "SDG 1: No Poverty", value: 8, color: "#ef4444" },
+  { label: "SDG 2: Zero Hunger", value: 6, color: "#f59e0b" },
+  { label: "SDG 3: Good Health", value: 12, color: "#10b981" },
+  { label: "SDG 4: Quality Education", value: 15, color: "#06b6d4" },
+  { label: "SDG 5: Gender Equality", value: 9, color: "#8b5cf6" },
+  { label: "SDG 6: Clean Water", value: 7, color: "#3b82f6" },
+];
+
+const sampleConnections = [
+  {
+    id: "1",
+    name: "Dr. Sarah Johnson",
+    title: "Professor of Sustainable Development",
+    location: "London, UK",
+    latitude: 51.5074,
+    longitude: -0.1278,
+    avatar: "https://i.pravatar.cc/150?img=1",
+  },
+  {
+    id: "2",
+    name: "Michael Chen",
+    title: "Environmental Researcher",
+    location: "Singapore",
+    latitude: 1.3521,
+    longitude: 103.8198,
+    avatar: "https://i.pravatar.cc/150?img=2",
+  },
+  {
+    id: "3",
+    name: "Dr. Amara Okafor",
+    title: "Public Health Specialist",
+    location: "Nairobi, Kenya",
+    latitude: -1.2921,
+    longitude: 36.8219,
+    avatar: "https://i.pravatar.cc/150?img=4",
+  },
+  {
+    id: "4",
+    name: "Carlos Rodriguez",
+    title: "Education Policy Advisor",
+    location: "Mexico City, Mexico",
+    latitude: 19.4326,
+    longitude: -99.1332,
+    avatar: "https://i.pravatar.cc/150?img=5",
+  },
+  {
+    id: "5",
+    name: "Aisha Rahman",
+    title: "Clean Energy Advocate",
+    location: "Dhaka, Bangladesh",
+    latitude: 23.8103,
+    longitude: 90.4125,
+    avatar: "https://i.pravatar.cc/150?img=6",
+  },
+];
+
+const generateEngagementData = () => {
+  const today = new Date();
+  const data = [];
+  
+  for (let i = 0; i < 40; i++) {
+    const daysAgo = Math.floor(Math.random() * 90);
+    const date = new Date();
+    date.setDate(today.getDate() - daysAgo);
+    
+    const count = Math.floor(Math.random() * 8) + 1;
+    let level: 0 | 1 | 2 | 3 | 4;
+    
+    if (count <= 2) level = 1;
+    else if (count <= 4) level = 2;
+    else if (count <= 6) level = 3;
+    else level = 4;
+    
+    data.push({
+      date,
+      count,
+      level,
+      activities: Array.from({ length: count }, (_, i) => `Activity ${i + 1}`),
+    });
+  }
+  
+  return data;
+};
+
+const sampleEngagementData = generateEngagementData();
+
 interface ProfileTabsProps {
   role?: string;
   profile: any; // Replace with proper type
@@ -147,8 +251,6 @@ interface ProfileTabsProps {
 
 export const ProfileTabs = ({ role, profile }: ProfileTabsProps) => {
   const loadMoreActivities = async () => {
-    // In a real implementation, this would call an API with pagination
-    // Here we just return an empty array to simulate end of data
     await new Promise(resolve => setTimeout(resolve, 1000));
     return [];
   };
@@ -158,6 +260,7 @@ export const ProfileTabs = ({ role, profile }: ProfileTabsProps) => {
       <TabsList className="w-full">
         <TabsTrigger value="about">About</TabsTrigger>
         <TabsTrigger value="dynamic">Dynamic Content</TabsTrigger>
+        <TabsTrigger value="visualizations">Visualizations</TabsTrigger>
         {role === "mentor" && <TabsTrigger value="mentor">Mentor Profile</TabsTrigger>}
         {role === "scholar" && <TabsTrigger value="scholar">Scholar Profile</TabsTrigger>}
         {role === "csr_funder" && <TabsTrigger value="csr">CSR Profile</TabsTrigger>}
@@ -263,6 +366,18 @@ export const ProfileTabs = ({ role, profile }: ProfileTabsProps) => {
             loadMore={loadMoreActivities} 
           />
           <AchievementBadgesCarousel badges={sampleBadges} />
+        </div>
+      </TabsContent>
+
+      <TabsContent value="visualizations" className="mt-6">
+        <div className="space-y-6">
+          <ImpactMetricsDashboard 
+            projectMetrics={sampleProjectMetrics}
+            fundingMetrics={sampleFundingMetrics}
+            sdgMetrics={sampleSdgMetrics}
+          />
+          <ConnectionMap connections={sampleConnections} />
+          <EngagementHeatmap engagementData={sampleEngagementData} />
         </div>
       </TabsContent>
 
