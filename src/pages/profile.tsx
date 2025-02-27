@@ -11,6 +11,9 @@ import { Card } from "@/components/ui/card";
 import { ImpactCard } from "@/components/impact-cards/ImpactCard";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Edit, Share, MoreHorizontal } from "lucide-react";
 
 export default function Profile() {
   const { user } = useAuth();
@@ -78,6 +81,9 @@ export default function Profile() {
   };
 
   const profileCompletionPercentage = calculateProfileCompletion();
+  
+  // Default cover photo if none is provided
+  const coverPhotoUrl = profile?.cover_photo_url || "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1920";
 
   if (isLoading) {
     return (
@@ -94,19 +100,68 @@ export default function Profile() {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      {/* Hero Header - Full Width */}
-      <div className="w-full bg-gradient-to-r from-primary/90 to-primary/70 text-white">
-        <div className="container mx-auto px-4 py-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            Welcome, {profile?.username || 'Scholar'}!
-          </h1>
-          <p className="text-xl opacity-90 max-w-xl">
-            Track your impact, connect with others, and showcase your contributions to sustainable development.
-          </p>
+      {/* Enhanced Hero Header with Cover Photo and Avatar */}
+      <div className="w-full relative">
+        {/* Cover Photo - 1200x300 */}
+        <div className="w-full h-[300px] relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30 z-10"></div>
+          <img 
+            src={coverPhotoUrl}
+            alt="Cover Photo"
+            className="w-full h-full object-cover"
+          />
+          
+          {/* Action Buttons - Top Right */}
+          <div className="absolute top-4 right-4 flex gap-2 z-20">
+            <Button size="sm" variant="secondary" className="flex items-center gap-1">
+              <Edit size={16} />
+              <span className="hidden sm:inline">Edit</span>
+            </Button>
+            
+            <Button size="sm" variant="secondary" className="flex items-center gap-1">
+              <Share size={16} />
+              <span className="hidden sm:inline">Share</span>
+            </Button>
+            
+            <Button size="sm" variant="secondary" className="flex items-center gap-1">
+              <MoreHorizontal size={16} />
+              <span className="hidden sm:inline">More</span>
+            </Button>
+          </div>
+          
+          {/* Avatar - Bottom Left, slightly overlapping */}
+          <div className="absolute -bottom-16 left-8 z-20">
+            <Avatar className="h-[150px] w-[150px] border-4 border-white shadow-md">
+              <AvatarImage src={profile?.avatar_url} alt={profile?.username || "User"} />
+              <AvatarFallback className="text-4xl bg-primary/10">
+                {profile?.username?.[0]?.toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+        </div>
+        
+        {/* User info area below cover photo */}
+        <div className="w-full bg-white pt-20 pb-6 px-8 shadow-sm">
+          <div className="container mx-auto">
+            <h1 className="text-3xl font-bold">
+              {profile?.username || 'Scholar'}
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              {profile?.bio || 'Complete your profile to add a bio'}
+            </p>
+            <div className="flex items-center text-muted-foreground mt-2">
+              <span className="mr-4">{profile?.location || 'Location not set'}</span>
+              {userRoles?.[0] && (
+                <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs font-medium">
+                  {userRoles[0]}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 mt-4">
         {/* Responsive Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
