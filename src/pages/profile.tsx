@@ -1,4 +1,3 @@
-
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileTabs } from "@/components/profile/ProfileTabs";
 import { Navigation } from "@/components/Navigation";
@@ -14,9 +13,28 @@ import "react-circular-progressbar/dist/styles.css";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Edit, Share, MoreHorizontal } from "lucide-react";
+import { ProfileInfoCard } from "@/components/profile/ProfileInfoCard";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Profile() {
   const { user } = useAuth();
+  const { toast } = useToast();
+
+  const handleMessage = () => {
+    toast({
+      title: "Opening messages",
+      description: "Redirecting to messaging interface...",
+    });
+    // Add messaging logic here
+  };
+
+  const handleConnect = () => {
+    toast({
+      title: "Connection request",
+      description: "Sending connection request...",
+    });
+    // Add connection logic here
+  };
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
@@ -63,7 +81,6 @@ export default function Profile() {
     enabled: !!user?.id,
   });
 
-  // Calculate profile completion percentage
   const calculateProfileCompletion = () => {
     if (!profile) return 0;
     
@@ -82,7 +99,6 @@ export default function Profile() {
 
   const profileCompletionPercentage = calculateProfileCompletion();
   
-  // Default cover photo if none is provided
   const coverPhotoUrl = profile?.cover_photo_url || "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1920";
 
   if (isLoading) {
@@ -100,9 +116,7 @@ export default function Profile() {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      {/* Enhanced Hero Header with Cover Photo and Avatar */}
       <div className="w-full relative">
-        {/* Cover Photo - 1200x300 */}
         <div className="w-full h-[300px] relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30 z-10"></div>
           <img 
@@ -111,7 +125,6 @@ export default function Profile() {
             className="w-full h-full object-cover"
           />
           
-          {/* Action Buttons - Top Right */}
           <div className="absolute top-4 right-4 flex gap-2 z-20">
             <Button size="sm" variant="secondary" className="flex items-center gap-1">
               <Edit size={16} />
@@ -129,7 +142,6 @@ export default function Profile() {
             </Button>
           </div>
           
-          {/* Avatar - Bottom Left, slightly overlapping */}
           <div className="absolute -bottom-16 left-8 z-20">
             <Avatar className="h-[150px] w-[150px] border-4 border-white shadow-md">
               <AvatarImage src={profile?.avatar_url} alt={profile?.username || "User"} />
@@ -140,7 +152,6 @@ export default function Profile() {
           </div>
         </div>
         
-        {/* User info area below cover photo */}
         <div className="w-full bg-white pt-20 pb-6 px-8 shadow-sm">
           <div className="container mx-auto">
             <h1 className="text-3xl font-bold">
@@ -162,12 +173,23 @@ export default function Profile() {
       </div>
       
       <div className="container mx-auto px-4 py-8 mt-4">
-        {/* Responsive Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* Column 1: Profile Info (3/12 on large screens) */}
           <div className="lg:col-span-3">
-            <Card className="shadow-md mb-6">
+            <ProfileInfoCard 
+              username={profile?.username}
+              role={userRoles?.[0]}
+              isVerified={true}
+              stats={{
+                impactPoints: 1250,
+                connections: 48,
+                following: 124
+              }}
+              onMessage={handleMessage}
+              onConnect={handleConnect}
+            />
+            
+            <Card className="shadow-md mb-6 mt-6">
               <div className="p-4">
                 <h2 className="text-xl font-semibold mb-4">Profile Completion</h2>
                 <div className="w-32 h-32 mx-auto mb-4">
@@ -198,12 +220,10 @@ export default function Profile() {
             />
           </div>
           
-          {/* Column 2: Dynamic Content - ProfileTabs (6/12 on large screens) */}
           <div className="lg:col-span-6">
             <ProfileTabs role={userRoles?.[0]} profile={profile} />
           </div>
           
-          {/* Column 3: Data Visualization - Recent Impact Cards (3/12 on large screens) */}
           <div className="lg:col-span-3">
             <Card className="shadow-md mb-6">
               <div className="p-4">
