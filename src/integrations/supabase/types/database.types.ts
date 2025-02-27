@@ -112,6 +112,32 @@ interface ProfileRow {
   updated_at: string | null
   username: string | null
   professional_background: string | null
+  bio: string | null
+  location: string | null
+  website: string | null
+  academic_background: string | null
+  social_links: Json | null
+  organization_name: string | null
+  organization_type: string | null
+  organization_description: string | null
+  skills: string[] | null
+  interests: string[] | null
+  expertise_areas: string[] | null
+  availability: Json | null
+  profile_completion_status: Json | null
+  mentor_expertise: string[] | null
+  csr_focus_areas: string[] | null
+  ngo_expertise_areas: string[] | null
+  project_collaborations: Json | null
+  impact_metrics: Json | null
+  mentor_availability: Json | null
+  mentor_years_experience: number | null
+  mentor_languages: Json | null
+  mentor_education: Json | null
+  mentor_achievements: Json | null
+  mentor_testimonials: Json | null
+  mentor_stats: Json | null
+  mentor_preferences: Json | null
 }
 
 interface ProfileInsert {
@@ -120,6 +146,32 @@ interface ProfileInsert {
   updated_at?: string | null
   username?: string | null
   professional_background?: string | null
+  bio?: string | null
+  location?: string | null
+  website?: string | null
+  academic_background?: string | null
+  social_links?: Json | null
+  organization_name?: string | null
+  organization_type?: string | null
+  organization_description?: string | null
+  skills?: string[] | null
+  interests?: string[] | null
+  expertise_areas?: string[] | null
+  availability?: Json | null
+  profile_completion_status?: Json | null
+  mentor_expertise?: string[] | null
+  csr_focus_areas?: string[] | null
+  ngo_expertise_areas?: string[] | null
+  project_collaborations?: Json | null
+  impact_metrics?: Json | null
+  mentor_availability?: Json | null
+  mentor_years_experience?: number | null
+  mentor_languages?: Json | null
+  mentor_education?: Json | null
+  mentor_achievements?: Json | null
+  mentor_testimonials?: Json | null
+  mentor_stats?: Json | null
+  mentor_preferences?: Json | null
 }
 
 interface ProfileUpdate {
@@ -128,4 +180,30 @@ interface ProfileUpdate {
   updated_at?: string | null
   username?: string | null
   professional_background?: string | null
+  bio?: string | null
+  location?: string | null
+  website?: string | null
+  academic_background?: string | null
+  social_links?: Json | null
+  organization_name?: string | null
+  organization_type?: string | null
+  organization_description?: string | null
+  skills?: string[] | null
+  interests?: string[] | null
+  expertise_areas?: string[] | null
+  availability?: Json | null
+  profile_completion_status?: Json | null
+  mentor_expertise?: string[] | null
+  csr_focus_areas?: string[] | null
+  ngo_expertise_areas?: string[] | null
+  project_collaborations?: Json | null
+  impact_metrics?: Json | null
+  mentor_availability?: Json | null
+  mentor_years_experience?: number | null
+  mentor_languages?: Json | null
+  mentor_education?: Json | null
+  mentor_achievements?: Json | null
+  mentor_testimonials?: Json | null
+  mentor_stats?: Json | null
+  mentor_preferences?: Json | null
 }
