@@ -1,199 +1,272 @@
-import { Navigation } from "@/components/Navigation";
-import { Card, CardContent } from "@/components/ui/card";
+
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useParams } from "react-router-dom";
+import { MessagesSidebar } from "@/components/messages/MessagesSidebar";
+import { MessageThread } from "@/components/messages/MessageThread";
+import { MessageInput } from "@/components/messages/MessageInput";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
+import { MainLayout } from "@/layouts/MainLayout";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useQueryClient } from "@tanstack/react-query";
 
-type Message = {
+export type Conversation = {
   id: string;
-  content: string;
-  sender_id: string;
-  created_at: string;
-}
+  otherUser: {
+    id: string;
+    username: string | null;
+    avatar_url: string | null;
+  };
+  lastMessage: {
+    content: string;
+    created_at: string;
+    is_read: boolean;
+  } | null;
+};
 
-export default function Messages() {
-  const { recipientId } = useParams();
+const MessagesPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { conversationId } = useParams();
   const queryClient = useQueryClient();
-  const [newMessage, setNewMessage] = useState("");
-
-  // Get or create conversation
-  const { data: conversation, isLoading: isLoadingConversation } = useQuery({
-    queryKey: ["conversation", user?.id, recipientId],
-    queryFn: async () => {
-      // First try to find existing conversation
-      const { data: existingParticipations } = await supabase
-        .from("conversation_participants")
-        .select("conversation_id")
-        .eq("user_id", user?.id);
-
-      if (existingParticipations?.length) {
-        for (const participation of existingParticipations) {
-          const { data: otherParticipant } = await supabase
-            .from("conversation_participants")
-            .select("user_id")
-            .eq("conversation_id", participation.conversation_id)
-            .eq("user_id", recipientId)
-            .single();
-
-          if (otherParticipant) {
-            return { id: participation.conversation_id };
+  const navigate = useNavigate();
+  
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
+  
+  // Fetch conversations on component mount
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchConversations = async () => {
+      try {
+        setLoading(true);
+        
+        // Get all direct messages where the user is either sender or recipient
+        const { data: messages, error: messagesError } = await supabase
+          .from("direct_messages")
+          .select(`
+            id,
+            content,
+            created_at,
+            is_read,
+            sender_id,
+            recipient_id,
+            sender:sender_id(id, username, avatar_url),
+            recipient:recipient_id(id, username, avatar_url)
+          `)
+          .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
+          .order("created_at", { ascending: false });
+        
+        if (messagesError) throw messagesError;
+        
+        // Process messages into conversations
+        const conversationsMap = new Map<string, Conversation>();
+        
+        messages.forEach((message) => {
+          const isUserSender = message.sender_id === user.id;
+          const otherUserId = isUserSender ? message.recipient_id : message.sender_id;
+          const otherUser = isUserSender ? message.recipient : message.sender;
+          
+          if (!conversationsMap.has(otherUserId)) {
+            conversationsMap.set(otherUserId, {
+              id: otherUserId,
+              otherUser: {
+                id: otherUserId,
+                username: otherUser.username,
+                avatar_url: otherUser.avatar_url,
+              },
+              lastMessage: {
+                content: message.content,
+                created_at: message.created_at,
+                is_read: message.is_read,
+              },
+            });
           }
-        }
-      }
-
-      // Create new conversation if none exists
-      const { data: newConversation, error: conversationError } = await supabase
-        .from("conversations")
-        .insert({})
-        .select()
-        .single();
-
-      if (conversationError) throw conversationError;
-
-      // Add participants
-      const { error: participantsError } = await supabase
-        .from("conversation_participants")
-        .insert([
-          { conversation_id: newConversation.id, user_id: user?.id },
-          { conversation_id: newConversation.id, user_id: recipientId }
-        ]);
-
-      if (participantsError) throw participantsError;
-
-      return newConversation;
-    },
-    enabled: !!user?.id && !!recipientId,
-  });
-
-  const { data: messages, isLoading: isLoadingMessages } = useQuery({
-    queryKey: ["messages", conversation?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("messages")
-        .select("*")
-        .eq("conversation_id", conversation?.id)
-        .order("created_at", { ascending: true });
-
-      if (error) throw error;
-      return data as Message[];
-    },
-    enabled: !!conversation?.id,
-  });
-
-  const sendMessage = useMutation({
-    mutationFn: async (content: string) => {
-      const { error } = await supabase
-        .from("messages")
-        .insert({
-          conversation_id: conversation?.id,
-          sender_id: user?.id,
-          content
         });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      setNewMessage("");
-      queryClient.invalidateQueries({ queryKey: ["messages"] });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleSend = () => {
-    if (newMessage.trim()) {
-      sendMessage.mutate(newMessage);
-    }
+        
+        setConversations(Array.from(conversationsMap.values()));
+        
+        // If conversationId is provided, set the current conversation
+        if (conversationId) {
+          const conversation = Array.from(conversationsMap.values()).find(
+            (c) => c.otherUser.id === conversationId
+          );
+          setCurrentConversation(conversation || null);
+        }
+      } catch (error) {
+        console.error("Error fetching conversations:", error);
+        setError("Failed to load conversations. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchConversations();
+    
+    // Subscribe to new messages
+    const channel = supabase
+      .channel("direct_messages_changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "direct_messages",
+          filter: `recipient_id=eq.${user.id}`,
+        },
+        (payload) => {
+          // When a new message arrives
+          const newMessage = payload.new;
+          
+          // Fetch sender details
+          const fetchSender = async () => {
+            const { data: sender } = await supabase
+              .from("profiles")
+              .select("id, username, avatar_url")
+              .eq("id", newMessage.sender_id)
+              .single();
+            
+            if (sender) {
+              // Update conversations list
+              setConversations((prev) => {
+                const existing = prev.find((c) => c.otherUser.id === sender.id);
+                
+                if (existing) {
+                  // Update existing conversation
+                  return prev.map((c) =>
+                    c.otherUser.id === sender.id
+                      ? {
+                          ...c,
+                          lastMessage: {
+                            content: newMessage.content,
+                            created_at: newMessage.created_at,
+                            is_read: newMessage.is_read,
+                          },
+                        }
+                      : c
+                  );
+                } else {
+                  // Create new conversation
+                  return [
+                    {
+                      id: sender.id,
+                      otherUser: {
+                        id: sender.id,
+                        username: sender.username,
+                        avatar_url: sender.avatar_url,
+                      },
+                      lastMessage: {
+                        content: newMessage.content,
+                        created_at: newMessage.created_at,
+                        is_read: newMessage.is_read,
+                      },
+                    },
+                    ...prev,
+                  ];
+                }
+              });
+              
+              // Show notification if not on this conversation
+              if (
+                !window.location.pathname.includes("/messages") ||
+                currentConversation?.otherUser.id !== sender.id
+              ) {
+                toast({
+                  title: `New message from ${sender.username || "User"}`,
+                  description: newMessage.content.substring(0, 50) + (newMessage.content.length > 50 ? "..." : ""),
+                  action: (
+                    <button
+                      onClick={() => navigate(`/messages/${sender.id}`)}
+                      className="text-primary hover:underline"
+                    >
+                      View
+                    </button>
+                  ),
+                });
+              }
+              
+              // Invalidate queries to force refresh
+              queryClient.invalidateQueries({ queryKey: ['messages'] });
+            }
+          };
+          
+          fetchSender();
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, conversationId, navigate, toast, queryClient]);
+  
+  const handleSelectConversation = (conversation: Conversation) => {
+    setCurrentConversation(conversation);
+    navigate(`/messages/${conversation.otherUser.id}`);
   };
-
-  if (isLoadingConversation) {
+  
+  if (!user) {
+    return <div>Please log in to access messages</div>;
+  }
+  
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
+      <MainLayout>
+        <div className="flex justify-center items-center h-[calc(100vh-100px)]">
+          <LoadingSpinner />
+        </div>
+      </MainLayout>
     );
   }
-
+  
+  if (error) {
+    return (
+      <MainLayout>
+        <Alert variant="destructive" className="max-w-lg mx-auto mt-8">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </MainLayout>
+    );
+  }
+  
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <main className="container mx-auto px-4 py-8 pt-24">
-        <Card className="max-w-2xl mx-auto">
-          <CardContent className="p-4">
-            <div className="h-[60vh] flex flex-col">
-              <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-                {isLoadingMessages ? (
-                  <div className="flex items-center justify-center h-full">
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                  </div>
-                ) : messages?.length === 0 ? (
-                  <p className="text-center text-muted-foreground">
-                    No messages yet
-                  </p>
-                ) : (
-                  messages?.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${
-                        message.sender_id === user?.id
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}
-                    >
-                      <div
-                        className={`max-w-[70%] rounded-lg p-3 ${
-                          message.sender_id === user?.id
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted"
-                        }`}
-                      >
-                        <p className="text-sm">{message.content}</p>
-                        <span className="text-xs opacity-70">
-                          {new Date(message.created_at).toLocaleTimeString()}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-              <div className="flex gap-2">
-                <Textarea
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type your message..."
-                  className="resize-none"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSend();
-                    }
-                  }}
+    <MainLayout>
+      <div className="grid grid-cols-1 md:grid-cols-4 h-[calc(100vh-100px)] bg-white rounded-lg overflow-hidden border">
+        <div className="col-span-1 border-r">
+          <MessagesSidebar
+            conversations={conversations}
+            currentConversationId={currentConversation?.otherUser.id}
+            onSelectConversation={handleSelectConversation}
+          />
+        </div>
+        <div className="col-span-1 md:col-span-3 flex flex-col">
+          {currentConversation ? (
+            <>
+              <div className="flex-1 overflow-hidden">
+                <MessageThread 
+                  conversationId={currentConversation.otherUser.id} 
+                  otherUser={currentConversation.otherUser}
                 />
-                <Button
-                  onClick={handleSend}
-                  disabled={!newMessage.trim()}
-                  className="flex-shrink-0"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
               </div>
+              <div className="p-4 border-t">
+                <MessageInput recipientId={currentConversation.otherUser.id} />
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              Select a conversation or start a new message
             </div>
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+          )}
+        </div>
+      </div>
+    </MainLayout>
   );
-}
+};
+
+export default MessagesPage;

@@ -1,3 +1,4 @@
+
 import { RouteObject } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { RoleBasedRoute } from "@/components/RoleBasedRoute";
@@ -11,6 +12,7 @@ const Register = lazy(() => import("@/pages/register"));
 const Profile = lazy(() => import("@/pages/profile"));
 const NGODashboard = lazy(() => import("@/pages/ngo-dashboard"));
 const ProjectDiscovery = lazy(() => import("@/pages/project-discovery"));
+const Messages = lazy(() => import("@/pages/messages"));
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -36,6 +38,16 @@ export const protectedRoutes: ProtectedRouteConfig[] = [
     element: <ProjectDiscovery />,
     allowedRoles: ["csr_funder"],
     title: "Discover Projects",
+  },
+  {
+    path: "/messages",
+    element: <Messages />,
+    title: "Messages",
+  },
+  {
+    path: "/messages/:conversationId",
+    element: <Messages />,
+    title: "Messages",
   },
 ];
 
@@ -77,6 +89,22 @@ export const routes: RouteObject[] = [
         <RoleBasedRoute allowedRoles={["csr_funder"]}>
           <ProjectDiscovery />
         </RoleBasedRoute>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/messages",
+    element: (
+      <ProtectedRoute>
+        <Messages />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/messages/:conversationId",
+    element: (
+      <ProtectedRoute>
+        <Messages />
       </ProtectedRoute>
     ),
   },
