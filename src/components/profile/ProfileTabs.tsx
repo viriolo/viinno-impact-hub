@@ -1,3 +1,4 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MentorProfile } from "./sections/MentorProfile";
 import { ScholarProfile } from "./sections/ScholarProfile";
@@ -7,6 +8,137 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Mail, Globe, Building2 } from "lucide-react";
+import { SkillsEndorsementsGrid } from "./sections/SkillsEndorsementsGrid";
+import { InteractiveTimeline } from "./sections/InteractiveTimeline";
+import { NetworkActivityFeed } from "./sections/NetworkActivityFeed";
+import { AchievementBadgesCarousel } from "./sections/AchievementBadgesCarousel";
+
+// Sample data for demonstration (replace with actual data from API)
+const sampleEndorsedSkills = [
+  { name: "Project Management", endorsements: 24 },
+  { name: "Research", endorsements: 18 },
+  { name: "Data Analysis", endorsements: 15 },
+  { name: "Sustainable Development", endorsements: 12 },
+  { name: "Leadership", endorsements: 9 },
+  { name: "Grant Writing", endorsements: 7 },
+];
+
+const sampleProjects = [
+  {
+    id: "1",
+    name: "Community Water Initiative",
+    startDate: new Date(2022, 0, 15),
+    endDate: new Date(2022, 5, 30),
+    status: "completed" as const,
+    description: "Led a team to implement sustainable water solutions in rural communities, benefiting over 5,000 people.",
+  },
+  {
+    id: "2",
+    name: "Education Access Program",
+    startDate: new Date(2022, 7, 1),
+    endDate: new Date(2023, 2, 15),
+    status: "completed" as const,
+    description: "Developed a scholarship program for underprivileged students, providing educational opportunities to 200+ students.",
+  },
+  {
+    id: "3",
+    name: "Renewable Energy Research",
+    startDate: new Date(2023, 3, 10),
+    endDate: new Date(2023, 11, 20),
+    status: "ongoing" as const,
+    description: "Conducting research on affordable renewable energy solutions for developing regions.",
+  },
+  {
+    id: "4",
+    name: "Global Health Initiative",
+    startDate: new Date(2024, 0, 5),
+    endDate: new Date(2024, 11, 31),
+    status: "planned" as const,
+    description: "Planning a comprehensive healthcare improvement project targeting underserved communities.",
+  },
+];
+
+const sampleActivities = [
+  {
+    id: "1",
+    type: "connection" as const,
+    title: "New Connection",
+    description: "Sarah Johnson accepted your connection request",
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+    user: {
+      id: "user1",
+      name: "Sarah Johnson",
+      avatar: "https://i.pravatar.cc/150?img=1",
+    },
+  },
+  {
+    id: "2",
+    type: "post" as const,
+    title: "New Post",
+    description: "Michael Chen shared 'Sustainable Development Goals: Progress Report 2024'",
+    timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+    user: {
+      id: "user2",
+      name: "Michael Chen",
+      avatar: "https://i.pravatar.cc/150?img=2",
+    },
+  },
+  {
+    id: "3",
+    type: "award" as const,
+    title: "Achievement Unlocked",
+    description: "You earned the 'Community Builder' badge for connecting with 50 scholars",
+    timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+    user: {
+      id: "user3",
+      name: "Achievement System",
+      avatar: "https://i.pravatar.cc/150?img=3",
+    },
+  },
+  {
+    id: "4",
+    type: "message" as const,
+    title: "New Message",
+    description: "Dr. Amara Okafor sent you a message about collaboration opportunities",
+    timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // 4 days ago
+    user: {
+      id: "user4",
+      name: "Dr. Amara Okafor",
+      avatar: "https://i.pravatar.cc/150?img=4",
+    },
+  },
+];
+
+const sampleBadges = [
+  {
+    id: "1",
+    name: "Impact Pioneer",
+    imageUrl: "https://via.placeholder.com/150?text=Impact",
+    description: "Created 5 impact cards in different categories",
+    dateAwarded: new Date(2023, 5, 15),
+  },
+  {
+    id: "2",
+    name: "Collaboration Champion",
+    imageUrl: "https://via.placeholder.com/150?text=Collab",
+    description: "Participated in 3 collaborative projects",
+    dateAwarded: new Date(2023, 8, 22),
+  },
+  {
+    id: "3",
+    name: "Global Networker",
+    imageUrl: "https://via.placeholder.com/150?text=Network",
+    description: "Connected with peers from 10 different countries",
+    dateAwarded: new Date(2023, 11, 10),
+  },
+  {
+    id: "4",
+    name: "SDG Advocate",
+    imageUrl: "https://via.placeholder.com/150?text=SDG",
+    description: "Contributed to projects supporting all 17 SDGs",
+    dateAwarded: new Date(2024, 2, 5),
+  },
+];
 
 interface ProfileTabsProps {
   role?: string;
@@ -14,10 +146,18 @@ interface ProfileTabsProps {
 }
 
 export const ProfileTabs = ({ role, profile }: ProfileTabsProps) => {
+  const loadMoreActivities = async () => {
+    // In a real implementation, this would call an API with pagination
+    // Here we just return an empty array to simulate end of data
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return [];
+  };
+
   return (
     <Tabs defaultValue="about" className="w-full">
       <TabsList className="w-full">
         <TabsTrigger value="about">About</TabsTrigger>
+        <TabsTrigger value="dynamic">Dynamic Content</TabsTrigger>
         {role === "mentor" && <TabsTrigger value="mentor">Mentor Profile</TabsTrigger>}
         {role === "scholar" && <TabsTrigger value="scholar">Scholar Profile</TabsTrigger>}
         {role === "csr_funder" && <TabsTrigger value="csr">CSR Profile</TabsTrigger>}
@@ -114,6 +254,18 @@ export const ProfileTabs = ({ role, profile }: ProfileTabsProps) => {
         </div>
       </TabsContent>
 
+      <TabsContent value="dynamic" className="mt-6">
+        <div className="space-y-6">
+          <SkillsEndorsementsGrid skills={sampleEndorsedSkills} />
+          <InteractiveTimeline projects={sampleProjects} />
+          <NetworkActivityFeed 
+            initialActivities={sampleActivities} 
+            loadMore={loadMoreActivities} 
+          />
+          <AchievementBadgesCarousel badges={sampleBadges} />
+        </div>
+      </TabsContent>
+
       {role === "mentor" && (
         <TabsContent value="mentor" className="mt-6">
           <MentorProfile profile={profile} />
@@ -139,4 +291,4 @@ export const ProfileTabs = ({ role, profile }: ProfileTabsProps) => {
       )}
     </Tabs>
   );
-};
+}
