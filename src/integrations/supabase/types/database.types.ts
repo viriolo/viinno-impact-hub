@@ -1,3 +1,4 @@
+
 export type Json =
   | string
   | number
@@ -48,7 +49,9 @@ export type Database = {
 interface ImpactCardRow {
   category: string | null
   created_at: string
+  current_amount: number | null
   description: string | null
+  goal_amount: number | null
   id: string
   latitude: number | null
   location: string | null
@@ -66,7 +69,9 @@ interface ImpactCardRow {
 interface ImpactCardInsert {
   category?: string | null
   created_at?: string
+  current_amount?: number | null
   description?: string | null
+  goal_amount?: number | null
   id?: string
   latitude?: number | null
   location?: string | null
@@ -84,7 +89,9 @@ interface ImpactCardInsert {
 interface ImpactCardUpdate {
   category?: string | null
   created_at?: string
+  current_amount?: number | null
   description?: string | null
+  goal_amount?: number | null
   id?: string
   latitude?: number | null
   location?: string | null
