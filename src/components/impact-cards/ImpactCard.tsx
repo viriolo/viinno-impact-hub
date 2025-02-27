@@ -3,9 +3,30 @@ import React, { useEffect, useState } from 'react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ImpactCard as ImpactCardType } from '@/integrations/supabase/types/models.types';
 import { supabase } from '@/integrations/supabase/client';
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 interface ImpactCardProps {
   card: ImpactCardType;
@@ -13,6 +34,7 @@ interface ImpactCardProps {
 
 export const ImpactCard: React.FC<ImpactCardProps> = ({ card }) => {
   const [creatorName, setCreatorName] = useState<string>('');
+  const [showMore, setShowMore] = useState(false);
   
   // Calculate progress percentage
   const progressPercentage = card.goal_amount && card.current_amount 
@@ -28,6 +50,47 @@ export const ImpactCard: React.FC<ImpactCardProps> = ({ card }) => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
+  };
+
+  // Chart.js data for funding comparison
+  const chartData = {
+    labels: ['Current', 'Goal'],
+    datasets: [
+      {
+        label: 'Funding Amount',
+        data: [card.current_amount || 0, card.goal_amount || 0],
+        backgroundColor: ['#10B981', '#D1D5DB'],
+        borderRadius: 6,
+      },
+    ],
+  };
+
+  // Chart.js options
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            return formatCurrency(context.raw);
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: function(value: any) {
+            return formatCurrency(value);
+          }
+        }
+      }
+    }
   };
 
   // Fetch creator's name
@@ -50,6 +113,20 @@ export const ImpactCard: React.FC<ImpactCardProps> = ({ card }) => {
     
     fetchCreator();
   }, [card.user_id]);
+
+  // Toggle show more content
+  const handleToggleMore = () => {
+    setShowMore(prev => !prev);
+  };
+
+  // Google Maps Static API URL
+  const getMapUrl = () => {
+    if (!card.latitude || !card.longitude) return null;
+    
+    return `https://maps.googleapis.com/maps/api/staticmap?center=${card.latitude},${card.longitude}&zoom=13&size=400x300&scale=2&markers=color:red%7C${card.latitude},${card.longitude}&key=AIzaSyBcufX9djtE5atVlr2qLvzjwXPphgh06Hc`;
+  };
+
+  const mapUrl = getMapUrl();
 
   return (
     <Card className="bg-white shadow-md rounded-lg p-4 max-w-md hover:shadow-lg transition-shadow">
@@ -127,6 +204,34 @@ export const ImpactCard: React.FC<ImpactCardProps> = ({ card }) => {
             Created by: {creatorName}
           </div>
         )}
+        
+        {/* Collapsible content */}
+        {showMore && (
+          <div className="mt-4 overflow-hidden transition-all duration-300">
+            {mapUrl ? (
+              <div className="w-full overflow-hidden rounded-md mt-2">
+                <img 
+                  src={mapUrl} 
+                  alt={`Map of ${card.location}`} 
+                  className="w-full h-auto object-cover sm:h-[150px] sm:w-[200px] md:w-full"
+                />
+              </div>
+            ) : (
+              <div className="w-full h-[150px] sm:h-[150px] mt-2">
+                <Bar data={chartData} options={chartOptions} />
+              </div>
+            )}
+          </div>
+        )}
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleToggleMore} 
+          className="w-full mt-4"
+        >
+          {showMore ? 'Show Less' : 'Show More'}
+        </Button>
       </CardContent>
       
       <CardFooter className="p-4 pt-2 text-xs text-gray-500 flex justify-between">
