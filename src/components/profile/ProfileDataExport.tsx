@@ -25,7 +25,7 @@ export function ProfileDataExport({ userId }: ProfileDataExportProps) {
         .single();
 
       if (error) throw error;
-      return data;
+      return data || {};
     },
     enabled: !!userId,
   });
@@ -53,7 +53,7 @@ export function ProfileDataExport({ userId }: ProfileDataExportProps) {
       // Structure the data
       const exportData = {
         profile: profileData,
-        skills: profileData?.skills || [],
+        skills: profileData.skills ? profileData.skills : [],
         roles: roles || [],
         impactCards: impactCards || [],
         exportDate: new Date().toISOString(),
@@ -64,7 +64,7 @@ export function ProfileDataExport({ userId }: ProfileDataExportProps) {
       const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
       
       // Create a download link
-      const exportFileDefaultName = `profile-data-${profileData?.username || userId}-${new Date().toISOString().slice(0, 10)}.json`;
+      const exportFileDefaultName = `profile-data-${profileData.username || userId}-${new Date().toISOString().slice(0, 10)}.json`;
       
       const linkElement = document.createElement('a');
       linkElement.setAttribute('href', dataUri);
