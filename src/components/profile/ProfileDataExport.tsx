@@ -10,12 +10,13 @@ interface ProfileDataExportProps {
   userId: string;
 }
 
-// Define a type for the profile data
+// Define a more comprehensive type for the profile data
 interface ProfileData {
   id: string;
   username?: string | null;
   skills?: string[] | null;
   // Add other properties as needed
+  [key: string]: any; // Allow for additional properties
 }
 
 export function ProfileDataExport({ userId }: ProfileDataExportProps) {
