@@ -34,50 +34,28 @@ export function ProfileDataExport({ userId }: ProfileDataExportProps) {
     setIsExporting(true);
     
     try {
-      // Collect all data from various tables
-      const [
-        { data: skillEndorsements },
-        { data: userAchievements },
-        { data: portfolioItems },
-        { data: impactCards },
-        { data: userRoles },
-      ] = await Promise.all([
-        supabase
-          .from("skill_endorsements")
-          .select(`
-            skill_id,
-            skills (name),
-            endorser_id,
-            profiles!skill_endorsements_endorser_id_fkey (username)
-          `)
-          .eq("endorsed_user_id", userId),
-        supabase
-          .from("user_achievements")
-          .select("*, achievements (*)")
-          .eq("user_id", userId),
-        supabase
-          .from("portfolio_items")
-          .select("*")
-          .eq("user_id", userId),
-        supabase
-          .from("impact_cards")
-          .select("*")
-          .eq("user_id", userId),
-        supabase
-          .from("user_roles")
-          .select("*")
-          .eq("user_id", userId),
-      ]);
+      // Use simpler approach that doesn't rely on database tables 
+      // that might not be available in the current database schema
+      const profileData = profile || {};
+      
+      // Get user roles
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("*")
+        .eq("user_id", userId);
+      
+      // Get impact cards
+      const { data: impactCards } = await supabase
+        .from("impact_cards")
+        .select("*")
+        .eq("user_id", userId);
 
       // Structure the data
       const exportData = {
-        profile,
-        skills: profile?.skills || [],
-        skillEndorsements: skillEndorsements || [],
-        achievements: userAchievements || [],
-        portfolioItems: portfolioItems || [],
+        profile: profileData,
+        skills: profileData?.skills || [],
+        roles: roles || [],
         impactCards: impactCards || [],
-        roles: userRoles || [],
         exportDate: new Date().toISOString(),
       };
 
@@ -86,7 +64,7 @@ export function ProfileDataExport({ userId }: ProfileDataExportProps) {
       const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
       
       // Create a download link
-      const exportFileDefaultName = `profile-data-${profile?.username || userId}-${new Date().toISOString().slice(0, 10)}.json`;
+      const exportFileDefaultName = `profile-data-${profileData?.username || userId}-${new Date().toISOString().slice(0, 10)}.json`;
       
       const linkElement = document.createElement('a');
       linkElement.setAttribute('href', dataUri);

@@ -1,95 +1,87 @@
 
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
-import { Check, MessageSquare, UserPlus } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MessageSquare, UserPlus, Shield } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface ProfileInfoCardProps {
-  username: string | null;
-  role: string | null;
+  username?: string;
+  role?: string;
   isVerified?: boolean;
   stats: {
     impactPoints: number;
     connections: number;
     following: number;
   };
-  onMessage?: () => void;
-  onConnect?: () => void;
+  onMessage: () => void;
+  onConnect: () => void;
+  isCurrentUser?: boolean;
 }
 
 export function ProfileInfoCard({
   username,
   role,
-  isVerified = false,
+  isVerified,
   stats,
   onMessage,
-  onConnect
+  onConnect,
+  isCurrentUser = false
 }: ProfileInfoCardProps) {
   return (
     <Card className="shadow-md">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-bold">{username || 'User'}</h2>
-          {isVerified && (
-            <Check className="w-5 h-5 text-primary" />
-          )}
-        </div>
-        <div className="flex gap-2 mt-2">
-          {role && (
-            <Badge variant="secondary" className="text-sm">
-              {role}
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      
-      <CardContent>
-        <div className="grid grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
-          <div className="text-center">
-            <div className="text-2xl font-semibold text-primary">
-              {stats.impactPoints}
+      <CardContent className="p-6">
+        <div className="flex items-center mb-4">
+          <Avatar className="h-12 w-12">
+            <AvatarImage 
+              src={`https://api.dicebear.com/6.x/avataaars/svg?seed=${username || 'avatar'}`} 
+              alt={username || "User"} 
+            />
+            <AvatarFallback>
+              {username ? username[0].toUpperCase() : "U"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="ml-4">
+            <div className="flex items-center">
+              <h3 className="font-semibold text-lg">{username || "User"}</h3>
+              {isVerified && (
+                <Shield className="h-4 w-4 text-blue-500 ml-1" />
+              )}
             </div>
-            <div className="text-sm text-muted-foreground">
-              Impact Points
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-semibold text-primary">
-              {stats.connections}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Connections
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-semibold text-primary">
-              {stats.following}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Following
-            </div>
+            {role && (
+              <p className="text-muted-foreground text-sm">{role}</p>
+            )}
           </div>
         </div>
+
+        <div className="grid grid-cols-3 gap-2 text-center mb-6">
+          <div className="bg-muted/50 rounded-md p-2">
+            <div className="font-semibold">{stats.impactPoints}</div>
+            <div className="text-xs text-muted-foreground">Impact Points</div>
+          </div>
+          <div className="bg-muted/50 rounded-md p-2">
+            <div className="font-semibold">{stats.connections}</div>
+            <div className="text-xs text-muted-foreground">Connections</div>
+          </div>
+          <div className="bg-muted/50 rounded-md p-2">
+            <div className="font-semibold">{stats.following}</div>
+            <div className="text-xs text-muted-foreground">Following</div>
+          </div>
+        </div>
+
+        {!isCurrentUser && (
+          <div className="flex gap-2 mt-2">
+            <Button variant="default" className="w-full" onClick={onMessage}>
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Message
+            </Button>
+            <Button variant="outline" className="w-full" onClick={onConnect}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Connect
+            </Button>
+          </div>
+        )}
       </CardContent>
-      
-      <CardFooter className="gap-2">
-        <Button
-          className="flex-1"
-          onClick={onMessage}
-          variant="default"
-        >
-          <MessageSquare className="w-4 h-4 mr-2" />
-          Message
-        </Button>
-        <Button
-          className="flex-1"
-          onClick={onConnect}
-          variant="outline"
-        >
-          <UserPlus className="w-4 h-4 mr-2" />
-          Connect
-        </Button>
-      </CardFooter>
     </Card>
   );
 }

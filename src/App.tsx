@@ -59,7 +59,7 @@ function App() {
               <Route
                 path="/mentor-dashboard"
                 element={
-                  <RoleBasedRoute requiredRole="mentor">
+                  <RoleBasedRoute allowedRoles={["mentor"]}>
                     <MentorDashboard />
                   </RoleBasedRoute>
                 }
@@ -67,7 +67,7 @@ function App() {
               <Route
                 path="/csr-dashboard"
                 element={
-                  <RoleBasedRoute requiredRole="csr_funder">
+                  <RoleBasedRoute allowedRoles={["csr_funder"]}>
                     <CSRDashboard />
                   </RoleBasedRoute>
                 }
@@ -75,7 +75,7 @@ function App() {
               <Route
                 path="/ngo-dashboard"
                 element={
-                  <RoleBasedRoute requiredRole="ngo">
+                  <RoleBasedRoute allowedRoles={["ngo"]}>
                     <NGODashboard />
                   </RoleBasedRoute>
                 }

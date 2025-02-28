@@ -1,3 +1,4 @@
+
 import { useAuth } from "@/components/AuthProvider";
 import { Navigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
