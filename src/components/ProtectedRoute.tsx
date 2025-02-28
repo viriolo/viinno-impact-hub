@@ -1,7 +1,12 @@
+
 import { useAuth } from "@/components/AuthProvider";
 import { Navigate, useLocation } from "react-router-dom";
 
-export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
+
+export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user } = useAuth();
   const location = useLocation();
 
@@ -10,4 +15,4 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   return <>{children}</>;
-};
+}

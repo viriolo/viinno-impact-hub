@@ -10,12 +10,20 @@ interface ProfileDataExportProps {
   userId: string;
 }
 
+// Define a type for the profile data
+interface ProfileData {
+  id: string;
+  username?: string | null;
+  skills?: string[] | null;
+  // Add other properties as needed
+}
+
 export function ProfileDataExport({ userId }: ProfileDataExportProps) {
   const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
 
   // Get basic profile data
-  const { data: profile } = useQuery({
+  const { data: profile } = useQuery<ProfileData>({
     queryKey: ["profile-export", userId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -25,7 +33,8 @@ export function ProfileDataExport({ userId }: ProfileDataExportProps) {
         .single();
 
       if (error) throw error;
-      return data || {};
+      // Return at least the ID to match the ProfileData interface
+      return data ? data : { id: userId };
     },
     enabled: !!userId,
   });
@@ -36,7 +45,7 @@ export function ProfileDataExport({ userId }: ProfileDataExportProps) {
     try {
       // Use simpler approach that doesn't rely on database tables 
       // that might not be available in the current database schema
-      const profileData = profile || {};
+      const profileData = profile || { id: userId };
       
       // Get user roles
       const { data: roles } = await supabase
@@ -53,7 +62,7 @@ export function ProfileDataExport({ userId }: ProfileDataExportProps) {
       // Structure the data
       const exportData = {
         profile: profileData,
-        skills: profileData.skills ? profileData.skills : [],
+        skills: profileData.skills || [],
         roles: roles || [],
         impactCards: impactCards || [],
         exportDate: new Date().toISOString(),
@@ -63,7 +72,7 @@ export function ProfileDataExport({ userId }: ProfileDataExportProps) {
       const dataStr = JSON.stringify(exportData, null, 2);
       const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
       
-      // Create a download link
+      // Create a download link with a safe fallback for username
       const exportFileDefaultName = `profile-data-${profileData.username || userId}-${new Date().toISOString().slice(0, 10)}.json`;
       
       const linkElement = document.createElement('a');
