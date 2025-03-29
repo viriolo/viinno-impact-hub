@@ -3,6 +3,9 @@ import { Routes, Route, BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { RoleBasedRoute } from "@/components/RoleBasedRoute";
+import { NotificationProvider } from "@/components/providers/NotificationProvider";
+import { ToastProvider } from "@/components/providers/ToastProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import Index from "@/pages/Index";
 import Login from "@/pages/login";
@@ -21,9 +24,6 @@ import EditImpactCard from "@/pages/edit-impact-card";
 import Messages from "@/pages/messages";
 import ResetPassword from "@/pages/reset-password";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { ToastProvider } from "@/components/providers/ToastProvider";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { NotificationProvider } from "@/components/providers/NotificationProvider";
 
 import "./App.css";
 
@@ -43,118 +43,120 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <ToastProvider>
-            <ErrorBoundary>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/mentor-dashboard"
-                  element={
-                    <RoleBasedRoute allowedRoles={["mentor"]}>
-                      <MentorDashboard />
-                    </RoleBasedRoute>
-                  }
-                />
-                <Route
-                  path="/csr-dashboard"
-                  element={
-                    <RoleBasedRoute allowedRoles={["csr_funder"]}>
-                      <CSRDashboard />
-                    </RoleBasedRoute>
-                  }
-                />
-                <Route
-                  path="/ngo-dashboard"
-                  element={
-                    <RoleBasedRoute allowedRoles={["ngo"]}>
-                      <NGODashboard />
-                    </RoleBasedRoute>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/profile/:id"
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/onboarding"
-                  element={
-                    <ProtectedRoute>
-                      <Onboarding />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/project-discovery"
-                  element={
-                    <ProtectedRoute>
-                      <ProjectDiscovery />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/impact-cards"
-                  element={
-                    <ProtectedRoute>
-                      <ImpactCards />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/impact-cards/:id"
-                  element={
-                    <ProtectedRoute>
-                      <ImpactCardDetail />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/create-impact-card"
-                  element={
-                    <ProtectedRoute>
-                      <CreateImpactCard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/edit-impact-card/:id"
-                  element={
-                    <ProtectedRoute>
-                      <EditImpactCard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/messages"
-                  element={
-                    <ProtectedRoute>
-                      <Messages />
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </ErrorBoundary>
+            <NotificationProvider>
+              <ErrorBoundary>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/mentor-dashboard"
+                    element={
+                      <RoleBasedRoute allowedRoles={["mentor"]}>
+                        <MentorDashboard />
+                      </RoleBasedRoute>
+                    }
+                  />
+                  <Route
+                    path="/csr-dashboard"
+                    element={
+                      <RoleBasedRoute allowedRoles={["csr_funder"]}>
+                        <CSRDashboard />
+                      </RoleBasedRoute>
+                    }
+                  />
+                  <Route
+                    path="/ngo-dashboard"
+                    element={
+                      <RoleBasedRoute allowedRoles={["ngo"]}>
+                        <NGODashboard />
+                      </RoleBasedRoute>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/profile/:id"
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/onboarding"
+                    element={
+                      <ProtectedRoute>
+                        <Onboarding />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/project-discovery"
+                    element={
+                      <ProtectedRoute>
+                        <ProjectDiscovery />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/impact-cards"
+                    element={
+                      <ProtectedRoute>
+                        <ImpactCards />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/impact-cards/:id"
+                    element={
+                      <ProtectedRoute>
+                        <ImpactCardDetail />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/create-impact-card"
+                    element={
+                      <ProtectedRoute>
+                        <CreateImpactCard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/edit-impact-card/:id"
+                    element={
+                      <ProtectedRoute>
+                        <EditImpactCard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/messages"
+                    element={
+                      <ProtectedRoute>
+                        <Messages />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+              </ErrorBoundary>
+            </NotificationProvider>
           </ToastProvider>
         </AuthProvider>
       </BrowserRouter>
