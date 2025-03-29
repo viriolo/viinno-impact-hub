@@ -6,12 +6,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import React from "react";
 
-type RoleBasedRouteProps = {
+interface RoleBasedRouteProps {
   children: React.ReactNode;
   allowedRoles: string[];
-};
+}
 
-export const RoleBasedRoute = ({ children, allowedRoles }: RoleBasedRouteProps) => {
+export const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({ children, allowedRoles }) => {
   const { user } = useAuth();
   const location = useLocation();
 
